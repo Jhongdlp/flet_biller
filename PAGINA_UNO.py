@@ -854,13 +854,15 @@ def main(page: ft.Page):
                                         
                                     ]),
                                     ft.Divider(),
-                                    ft.Row([
-                                        Boton_Eliminar_Datos,
-                                        Boton_consumirdor_final,
-                                        card_totales_generar,
-                                    ])
-            
-                                    
+                                    ft.Container(width=500,
+                                        content=ft.Column(controls=[
+                                            ft.Row([
+                                                Boton_Eliminar_Datos,
+                                                Boton_consumirdor_final,
+                                                card_totales_generar,
+                                            ])
+                                        ])
+                                    ),
                                 ])
                             ),
                             ft.Container(height=600,content=(
@@ -870,7 +872,7 @@ def main(page: ft.Page):
                                 #border=ft.border.all(),
                                 content=ft.Column(spacing=0,
                                     controls=[
-                                        ft.Row([ft.Text("Ingresa el ID de los productos",size=25),id_producto,delete_all_button]),ft.Divider(), scrollable_container, 
+                                        ft.Row([ft.Text("Ingresa el ID de los productos:",size=25),id_producto,delete_all_button]),ft.Divider(), scrollable_container, 
                                 ])
                             ),
                         ])

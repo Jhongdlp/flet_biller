@@ -8,7 +8,7 @@ def get_product_data(product_id):
             host="localhost",
             user="root",
             passwd="",
-            db="prueba_productos"
+            db="billify"
         )
 
         # Crear un cursor para ejecutar consultas en la base de datos
