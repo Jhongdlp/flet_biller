@@ -24,6 +24,9 @@ page_size = 10
 total_records = get_total_records()
 total_pages = (total_records + page_size - 1) // page_size  # Redondeo hacia arriba
 
+# Variable para almacenar la página actual
+current_page_label = ft.Text(value="Página 1 de {}".format(total_pages))
+
 # Función para obtener datos de una página específica con filtros de búsqueda
 def get_page(page, search_query='', search_tip_prod='', search_tip_esp_prod=''):
     offset = (page - 1) * page_size
@@ -65,16 +68,33 @@ def update_page(page, page_number, search_query='', search_tip_prod='', search_t
         data_table.rows.append(ft.DataRow(cells=[
             ft.DataCell(ft.Text(cell)) for cell in row
         ]))
+    current_page_label.value = "Página {} de {}".format(page_number, total_pages)
     page.update()
     update_pagination_controls(page, page_number, total_records_filtered)
 
 # Función para actualizar los controles de paginación
 def update_pagination_controls(page, current_page=1, total_records_filtered=None):
     pagination_controls.controls.clear()
-    
-    for i in range(1, total_pages + 1):
+
+    if current_page > 1:
+        pagination_controls.controls.append(
+            ft.TextButton(text="Primero", on_click=lambda e: update_page(page, 1, search_field.value, search_tip_prod_field.value, search_tip_esp_prod_field.value))
+        )
+        pagination_controls.controls.append(
+            ft.TextButton(text="Anterior", on_click=lambda e: update_page(page, current_page - 1, search_field.value, search_tip_prod_field.value, search_tip_esp_prod_field.value))
+        )
+
+    for i in range(max(1, current_page - 2), min(total_pages + 1, current_page + 3)):
         pagination_controls.controls.append(
             ft.TextButton(text=str(i), on_click=lambda e, p=i: update_page(page, p, search_field.value, search_tip_prod_field.value, search_tip_esp_prod_field.value))
+        )
+    
+    if current_page < total_pages:
+        pagination_controls.controls.append(
+            ft.TextButton(text="Siguiente", on_click=lambda e: update_page(page, current_page + 1, search_field.value, search_tip_prod_field.value, search_tip_esp_prod_field.value))
+        )
+        pagination_controls.controls.append(
+            ft.TextButton(text="Último", on_click=lambda e: update_page(page, total_pages, search_field.value, search_tip_prod_field.value, search_tip_esp_prod_field.value))
         )
     
     page.update()
@@ -90,6 +110,13 @@ def search_product(event, page):
         update_page(page, 1)
     else:
         update_page(page, 1, search_query, search_tip_prod, search_tip_esp_prod)
+
+# Función para limpiar los campos de búsqueda y restablecer la tabla
+def clear_search_fields(event, page):
+    search_field.value = ""
+    search_tip_prod_field.value = ""
+    search_tip_esp_prod_field.value = ""
+    search_product(event, page)
 
 # Interfaz de usuario de Flet
 def main(page: ft.Page):
@@ -129,6 +156,12 @@ def main(page: ft.Page):
         on_submit=lambda event: search_product(event, page)
     )
 
+    # Botón para limpiar los campos de búsqueda
+    clear_button = ft.TextButton(
+        text="Limpiar",
+        on_click=lambda event: clear_search_fields(event, page)
+    )
+
     # Controles de paginación
     pagination_controls = ft.Row()
     update_pagination_controls(page)
@@ -138,6 +171,8 @@ def main(page: ft.Page):
             search_field,
             search_tip_prod_field,
             search_tip_esp_prod_field,
+            clear_button,
+            current_page_label  # Indicador de la página actual
         ]),
         data_table,
         pagination_controls
