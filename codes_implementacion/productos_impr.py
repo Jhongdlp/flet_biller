@@ -55,64 +55,41 @@ def get_page(page, search_query='', search_tip_prod='', search_tip_esp_prod=''):
     total_pages = (total_records_filtered + page_size - 1) // page_size  # Redondeo hacia arriba
     
     db.close()
-    return data
+    return data, total_records_filtered
 
-# Función de actualización de página
-def update_page(page, page_num, search_query='', search_tip_prod='', search_tip_esp_prod=''):
+# Función para actualizar los datos en la tabla
+def update_page(page, page_number, search_query='', search_tip_prod='', search_tip_esp_prod=''):
+    data, total_records_filtered = get_page(page_number, search_query, search_tip_prod, search_tip_esp_prod)
     data_table.rows.clear()
-    for row in get_page(page_num, search_query, search_tip_prod, search_tip_esp_prod):
-        data_table.rows.append(
-            ft.DataRow(cells=[ft.DataCell(ft.Text(str(cell))) for cell in row])
+    for row in data:
+        data_table.rows.append(ft.DataRow(cells=[
+            ft.DataCell(ft.Text(cell)) for cell in row
+        ]))
+    page.update()
+    update_pagination_controls(page, page_number, total_records_filtered)
+
+# Función para actualizar los controles de paginación
+def update_pagination_controls(page, current_page=1, total_records_filtered=None):
+    pagination_controls.controls.clear()
+    
+    for i in range(1, total_pages + 1):
+        pagination_controls.controls.append(
+            ft.TextButton(text=str(i), on_click=lambda e, p=i: update_page(page, p, search_field.value, search_tip_prod_field.value, search_tip_esp_prod_field.value))
         )
+    
     page.update()
 
-    # Actualizar los controles de paginación según el número total de páginas
-    update_pagination_controls(page)
-
-def update_pagination_controls(page):
-    pagination_controls.controls.clear()
-    for i in range(1, total_pages + 1):
-        pagination_controls.controls.append(ft.ElevatedButton(str(i), on_click=lambda e, p=i: update_page(page, p, search_field.value, search_tip_prod_field.value, search_tip_esp_prod_field.value)))
-
-# Función para buscar productos por nombre, tipo de producto y tipo específico
+# Función de búsqueda
 def search_product(event, page):
-    global total_pages
+    search_query = search_field.value
+    search_tip_prod = search_tip_prod_field.value
+    search_tip_esp_prod = search_tip_esp_prod_field.value
     
-    search_query = search_field.value.strip()
-    search_tip_prod = search_tip_prod_field.value.strip()
-    search_tip_esp_prod = search_tip_esp_prod_field.value.strip()
-    
+    # Si todos los campos de búsqueda están vacíos, restablecer al estado original
     if not search_query and not search_tip_prod and not search_tip_esp_prod:
-        # Si todos los campos están vacíos, mostrar todos los registros
-        total_records = get_total_records()
-        total_pages = (total_records + page_size - 1) // page_size  # Redondeo hacia arriba
         update_page(page, 1)
-        
-        return
-    
-    # Actualizar el total de registros basados en la búsqueda
-    db = get_db_connection()
-    cursor = db.cursor()
-    
-    query = "SELECT COUNT(*) FROM productos WHERE 1"
-    params = []
-    
-    if search_query:
-        query += " AND NOM_PROD LIKE %s"
-        params.append('%' + search_query + '%')
-    if search_tip_prod:
-        query += " AND TIP_PROD = %s"
-        params.append(search_tip_prod)
-    if search_tip_esp_prod:
-        query += " AND TIP_ESP_PROD = %s"
-        params.append(search_tip_esp_prod)
-    
-    cursor.execute(query, params)
-    total_records = cursor.fetchone()[0]
-    total_pages = (total_records + page_size - 1) // page_size  # Redondeo hacia arriba
-    db.close()
-    
-    update_page(page, 1, search_query, search_tip_prod, search_tip_esp_prod)
+    else:
+        update_page(page, 1, search_query, search_tip_prod, search_tip_esp_prod)
 
 # Interfaz de usuario de Flet
 def main(page: ft.Page):
