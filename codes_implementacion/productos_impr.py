@@ -50,6 +50,8 @@ def get_page(page, search_query='', search_tip_prod='', search_tip_esp_prod=''):
     
     cursor.execute(query, params)
     data = cursor.fetchall()
+    if len(data) == 0:
+        print("Error: No se encontraron resultados para la búsqueda.")
     
     # Obtener el número total de registros después de aplicar los filtros
     cursor.execute(f"SELECT COUNT(*) FROM productos WHERE 1 {'AND NOM_PROD LIKE %s' if search_query else ''} {'AND TIP_PROD = %s' if search_tip_prod else ''} {'AND TIP_ESP_PROD = %s' if search_tip_esp_prod else ''}", params)
@@ -124,6 +126,7 @@ def main(page: ft.Page):
     page.title = "Paginación de Productos"
 
     data_table = ft.DataTable(
+        width=1100,
         columns=[
             ft.DataColumn(ft.Text("ID_PROD")),
             ft.DataColumn(ft.Text("NOM_PROD")),
