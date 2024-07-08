@@ -1,9 +1,8 @@
 import flet as ft
-from flet_route import Params,Basket
 import pymysql
 from cryptography.fernet import Fernet
 
-def Login(page: ft.Page,params: Params, basket: Basket):
+def Login_page(page: ft.Page):
     page.window_maximized=True
     #page.window_resizable=False
     #page.window_prevent_close = True
@@ -93,7 +92,7 @@ def Login(page: ft.Page,params: Params, basket: Basket):
             # Validar la contraseña ingresada por el usuario
             if contraseña == texto_desencriptado:
                 print("Se permitió entrar.")
-                page.go("/page1/:my_id")
+                page.go("/home")
             else:
                 print("La contraseña es incorrecta. No se permitió el acceso.")
         else:
@@ -314,9 +313,15 @@ def Login(page: ft.Page,params: Params, basket: Basket):
             ])
     )
     
-    return ft.View(
-        "/",
+    return ft.Row(
         controls=[
-            Login
+            ft.Container(
+                expand=True,
+                content=ft.Column(
+                    controls=[
+                        Login
+                    ]
+                )
+            )
         ]
     )

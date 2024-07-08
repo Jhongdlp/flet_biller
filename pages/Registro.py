@@ -1,9 +1,9 @@
 import flet as ft
-from flet_route import Params,Basket
 import pymysql
 from cryptography.fernet import Fernet
 
-def registrarse(page:ft.Page,params:Params, basket: Basket):
+def RegistroPage(page: ft.Page):
+
     page.window_maximized=True
     page.window_resizable=False
     #page.window_prevent_close = True
@@ -286,10 +286,17 @@ def registrarse(page:ft.Page,params:Params, basket: Basket):
                 )
             ])
     )
-
-    return ft.View(
-        "/registrarse/:idk",
+    return ft.Row(
+        spacing=0,
         controls=[
-            Registrarse
+            ft.Container(
+                expand=True,
+                content=ft.Column(
+                    spacing=0,
+                    controls=[
+                        Registrarse
+                    ]
+                )
+            )
         ]
     )
