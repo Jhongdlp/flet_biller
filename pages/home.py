@@ -2,10 +2,11 @@ import flet as ft
 
 
 def HomePage(page: ft.Page):
-    #page.theme_mode=ft.ThemeMode.LIGHT
+    page.theme_mode=ft.ThemeMode.LIGHT
     page.window_maximized=True
     page.window_title_bar_hidden = True
     page.padding=0
+    page.update()
     def go_to_page_two(e):
         page.go("/inventario")
         page.update()
@@ -23,9 +24,10 @@ def HomePage(page: ft.Page):
         if page.theme_mode == ft.ThemeMode.LIGHT:
             page.theme_mode = ft.ThemeMode.DARK
             boton_darl_ligth_mode.icon = ft.icons.DARK_MODE  # Icono de la luna
+            page.update()
         else:
             page.theme_mode = ft.ThemeMode.LIGHT
-            boton_darl_ligth_mode.icon = ft.icons.LIGHT_MODE  # Icono del sol
+            boton_darl_ligth_mode.icon = ft.icons.DARK_MODE  # Icono de la luna
         update_border_color()          
         page.update()
         

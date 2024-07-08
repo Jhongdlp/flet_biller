@@ -127,6 +127,7 @@ def main(page: ft.Page):
 
     data_table = ft.DataTable(
         width=1100,
+        scale=0.95,
         columns=[
             ft.DataColumn(ft.Text("ID_PROD")),
             ft.DataColumn(ft.Text("NOM_PROD")),
@@ -144,18 +145,24 @@ def main(page: ft.Page):
     search_field = ft.TextField(
         label="Buscar por Nombre",
         width=200,
+        height=40,
+        content_padding=5,
         on_submit=lambda event: search_product(event, page)
     )
     
     search_tip_prod_field = ft.TextField(
         label="Buscar por Tipo de Producto",
         width=200,
+        height=40,
+        content_padding=5, 
         on_submit=lambda event: search_product(event, page)
     )
     
     search_tip_esp_prod_field = ft.TextField(
         label="Buscar por Tipo Específico de Producto",
         width=200,
+        height=40,
+        content_padding=5,
         on_submit=lambda event: search_product(event, page)
     )
 

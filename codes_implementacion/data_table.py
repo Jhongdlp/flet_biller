@@ -1,5 +1,5 @@
 import flet as ft
-import bd.base_implemtnacion as bd
+from sql.base_implemtnacion import get_product_data
 
 def main(page: ft.Page):
     page.title = "Flet DataTable Generator"
@@ -67,7 +67,7 @@ def main(page: ft.Page):
             id_producto.focus()
             return
 
-        product_data = bd.get_product_data(product_id)
+        product_data = get_product_data(product_id)
 
         if not product_data:
             page.snack_bar = ft.SnackBar(

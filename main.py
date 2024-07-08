@@ -1,9 +1,12 @@
 import flet as ft
 from pages.home import HomePage
-from pages.views.generar_bd import inventario_page
 from pages.login_page import Login_page
-from pages.views.add_pro_page import generar_factura_pro
 from pages.Registro import RegistroPage
+
+from pages.views.view_inventario import view_inventario_all
+from pages.views.view_clientes import view_clientes_all
+from pages.views.view_generar_facturas import generar_factura_pro
+from pages.views.view_facturas import inventario_page
 # Función principal
 def main(page: ft.Page):
     # Contenedor para las páginas
@@ -22,12 +25,17 @@ def main(page: ft.Page):
         elif page_name == "home":
             page_container.content = HomePage(page)
             
-        elif page_name == "inventario":
+        elif page_name == "Facturas":
             page_container.content = inventario_page(page)
 
         elif page_name == "generar_facturas":
             page_container.content = generar_factura_pro(page)
 
+        elif page_name == "Clientes":
+            page_container.content = view_clientes_all(page)
+
+        elif page_name == "Inventario":
+            page_container.content = view_inventario_all(page)
 
         page.update()
 

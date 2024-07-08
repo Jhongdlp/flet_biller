@@ -4,11 +4,11 @@ def create_navigation_rail(page: ft.Page, selected_index: int):
     rail = ft.NavigationRail(
         width=120,
         height=700,
-        #bgcolor=ft.colors.TRANSPARENT,
+        bgcolor=ft.colors.TRANSPARENT,
         selected_index=selected_index,
         label_type=ft.NavigationRailLabelType.ALL,
         indicator_shape=ft.StadiumBorder(),
-        elevation=20,
+        #elevation=20,
         group_alignment=-1,
         destinations=[
             ft.NavigationRailDestination(
@@ -42,6 +42,6 @@ def create_navigation_rail(page: ft.Page, selected_index: int):
                 label_content=ft.Text("Estadisticas"),padding=13
             ),
         ],
-        on_change=lambda e: page.go(["/home", "/inventario", "/generar_facturas"][e.control.selected_index])
+        on_change=lambda e: page.go(["/home", "/Facturas", "/generar_facturas","/Clientes","/Inventario"][e.control.selected_index])
     )
     return rail
