@@ -1,4 +1,5 @@
 import flet as ft
+import re
 from components.rail import create_navigation_rail
 from sql.base_implemtnacion import get_product_data
 
@@ -79,6 +80,10 @@ def generar_factura_pro(page: ft.Page):
         input_filter=ft.InputFilter(allow=True, regex_string=r"[0-9]", replacement_string=""),
         content_padding=5                          
     )
+    def is_valid_email(email):
+        pattern = r'^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$'
+        return re.match(pattern, email) is not None
+
     def on_generar_factura_click(e):
         """
         Valida los campos y genera la factura XML y PDF si todo es correcto.
@@ -106,6 +111,7 @@ def generar_factura_pro(page: ft.Page):
             error = True
         else:
             apellido_cliente_texfield.error_text = None
+
         if not direccion_cliente_texfield.value:
             direccion_cliente_texfield.error_text = "Este campo es obligatorio"
             direccion_cliente_texfield.error_style = ft.TextStyle(color=ft.colors.RED)
@@ -124,16 +130,19 @@ def generar_factura_pro(page: ft.Page):
             mail_cliente_texfield.error_text = "Este campo es obligatorio"
             mail_cliente_texfield.error_style = ft.TextStyle(color=ft.colors.RED)
             error = True
+        elif not is_valid_email(mail_cliente_texfield.value):
+            mail_cliente_texfield.error_text = "Ingrese un correo electrónico válido"
+            mail_cliente_texfield.error_style = ft.TextStyle(color=ft.colors.RED)
+            error = True
         else:
             mail_cliente_texfield.error_text = None
 
         # Validar si hay productos en la tabla
         if not data_table.rows:
             page.snack_bar = ft.SnackBar(
-                
                 ft.Text("No hay productos en la factura.", size=15),
                 bgcolor=ft.colors.RED_400,
-                duration=3000  
+                duration=3000
             )
             page.snack_bar.open = True
             error = True
@@ -182,26 +191,7 @@ def generar_factura_pro(page: ft.Page):
     subtotal_value = ft.Text(value="0.00")
     iva_value = ft.Text(value="0.00")
     total_value = ft.Text(value="0.00")
-    
-    card_totales_generar=ft.Card(elevation=5,content=ft.Container(
-        width=170,
-        height=135,
-        padding=10,
-        content=ft.Column(spacing=0,controls=[
-            ft.Row([ft.Text("Subtotal: "), subtotal_value]),
-            ft.Row([ft.Text("Iva: "), iva_value]),
-            ft.Row([ft.Text("Total: "), total_value]),
-            ft.Divider(color=ft.colors.TRANSPARENT),
-            ft.ElevatedButton("Generar Factura",
-            width=160,
-            height=35,
-            bgcolor=ft.colors.INDIGO_600,
-            color=ft.colors.WHITE,
-            on_click=on_generar_factura_click
-            ),
-            ft.Divider(color=ft.colors.TRANSPARENT),
-        ])
-    ))
+
     data_table = ft.DataTable(
         width=800,
         column_spacing=15,
@@ -352,9 +342,105 @@ def generar_factura_pro(page: ft.Page):
 
     id_producto.on_submit = add_product
 
+    def abrir_dialogo_pago(e):
+        """Abre el AlertDialog para gestionar el pago."""
 
+        def calcular_cambio(e):
+            """Calcula el cambio cuando cambia el valor de 'dinero_input'."""
+            try:
+                dinero_ingresado = float(dinero_input.value)
+                cambio = dinero_ingresado - float(total_value.value)
+                cambio_text.value = f"Cambio: {cambio:.2f}"
+            except ValueError:
+                cambio_text.value = "Ingresa un número válido"
+            page.update()
 
+        # Crear los controles del AlertDialog
+        dinero_input = ft.TextField(label="Dinero Ingresado", on_change=calcular_cambio)
+        cambio_text = ft.Text("Cambio: 0.00")
+        total_productos_text = ft.Text(f"Total de productos: {len(data_table.rows)}")
 
+        # Crear el AlertDialog
+        dlg = ft.AlertDialog(
+            modal=True,
+            title=ft.Text("Pago"),
+            content=ft.Column(
+                [
+                    dinero_input,
+                    cambio_text,
+                    total_productos_text,
+                ]
+            ),
+            actions=[
+                ft.ElevatedButton(
+                    text="Cerrar", 
+                    on_click=lambda e: (
+                        setattr(dlg, "open", False),  # Asignar False a dlg.open
+                        page.update()
+                    )
+                ),
+            ],
+        )
+
+        # Abrir el AlertDialog
+        page.dialog = dlg
+        dlg.open = True
+        page.update()
+
+    
+    def cerrar_alert_metodo_de_pago(e):
+        alert_metodo_pago.open = False
+        page.update()
+
+    alert_metodo_pago = ft.AlertDialog(
+        modal=False,
+        title=ft.Text("Elige el metodo de pago"),
+        content=ft.Container(
+            height=240,
+            content=ft.Column(spacing=0,controls=[
+                ft.Container(
+                    content=ft.Text("Targeta de credito",size=20,color=ft.colors.WHITE),
+                    margin=10,
+                    padding=10,
+                    alignment=ft.alignment.center,
+                    bgcolor=ft.colors.GREEN_600,
+                    width=350,
+                    height=60,
+                    border_radius=10,
+                    on_click=lambda e: print("Clickable without Ink clicked!"),
+                ),
+                ft.Container(
+                    content=ft.Text("Targeta de debito",size=20,color=ft.colors.WHITE),
+                    margin=10,
+                    padding=10,
+                    alignment=ft.alignment.center,
+                    bgcolor=ft.colors.PURPLE_600,
+                    width=350,
+                    height=60,
+                    border_radius=10,
+                    on_click=lambda e: print("Clickable without Ink clicked!"),
+                ),
+                ft.Container(
+                    content=ft.Text("Pago en efectivo",size=20,color=ft.colors.WHITE),
+                    margin=10,
+                    padding=10,
+                    alignment=ft.alignment.center,
+                    bgcolor=ft.colors.BLUE_600,
+                    width=350,
+                    height=60,
+                    border_radius=10,
+                    on_click=abrir_dialogo_pago,
+                ),
+            ])
+        ),
+        actions_alignment=ft.MainAxisAlignment.END,
+    )
+    def abrir_alert_metodo_pago(e):
+        page.dialog = alert_metodo_pago
+        alert_metodo_pago.open = True
+        page.update()
+    
+   
     delete_all_button = ft.ElevatedButton(text="Eliminar todas las filas", on_click=delete_all_rows)
 
     Boton_consumirdor_final=ft.ElevatedButton("Consumidor final",width=158,height=35,bgcolor=ft.colors.GREEN_500,color="WHITE",
@@ -363,6 +449,25 @@ def generar_factura_pro(page: ft.Page):
     Boton_Eliminar_Datos=ft.ElevatedButton("Eliminar Datos",width=147,height=35,bgcolor=ft.colors.RED,color=ft.colors.WHITE,
         #on_click=Boton_Eliminar_Datos_logica
         )
+    card_totales_generar=ft.Card(elevation=5,content=ft.Container(
+        width=170,
+        height=135,
+        padding=10,
+        content=ft.Column(spacing=0,controls=[
+            ft.Row([ft.Text("Subtotal: "), subtotal_value]),
+            ft.Row([ft.Text("Iva: "), iva_value]),
+            ft.Row([ft.Text("Total: "), total_value]),
+            ft.Divider(color=ft.colors.TRANSPARENT),
+            ft.ElevatedButton("Generar Factura",
+            width=160,
+            height=35,
+            bgcolor=ft.colors.INDIGO_600,
+            color=ft.colors.WHITE,
+            on_click=abrir_alert_metodo_pago
+            ),
+            ft.Divider(color=ft.colors.TRANSPARENT),
+        ])
+    ))
     page_three_ui=ft.Column([
         ft.Container(
             padding=0,

@@ -10,6 +10,7 @@ from reportlab.lib.units import inch
 from reportlab.lib import colors
 import uuid
 import os
+import pymysql
 def main(page: ft.Page):
     page.title = "Flet DataTable Generator"
 
@@ -404,16 +405,145 @@ def main(page: ft.Page):
     generar_factura_button = ft.ElevatedButton(
         text="Generar Factura XML", on_click=generar_factura
     )
+    def guardar_factura_db(e):
+        """Guarda los datos de la factura en la base de datos."""
 
-    # --- Agregar los nuevos elementos a la página ---
+        # 1. Obtener datos de la factura (incluyendo teléfono y email)
+        cedula_cliente = cedula.value
+        nombre_cliente = nombre.value
+        apellido_cliente = apellido.value
+        telefono_cliente = telefono.value
+        email_cliente = email.value
+        fecha_factura = datetime.now().strftime("%Y-%m-%d")
+
+        # 2. Construir la cadena de productos
+        productos_str = ",".join(
+            [
+                f"{row.cells[1].content.value}.{row.cells[6].content.value}"
+                for row in data_table.rows
+            ]
+        )
+
+        # 3. Construir la cadena de totales
+        totales_str = f"{subtotal_value.value},{iva_value.value},{total_value.value}"
+
+        # 4. Conexión a la base de datos 
+        conexion = pymysql.connect(
+            host="localhost",
+            user="root",
+            password="",
+            database="billify"
+        )
+
+        try:
+            # 5. Crear un cursor
+            cursor = conexion.cursor()
+
+            # 6. Consulta SQL para insertar la factura (incluyendo teléfono y email)
+            sql = """
+                INSERT INTO facturas (cedula, nombre, apellido, telefono, 
+                                    email, fecha, productos, totales) 
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+            """
+            valores = (
+                cedula_cliente,
+                nombre_cliente,
+                apellido_cliente,
+                telefono_cliente,  # Nuevo campo
+                email_cliente,     # Nuevo campo
+                fecha_factura,
+                productos_str,
+                totales_str,
+            )
+
+            # 7. Ejecutar la consulta
+            cursor.execute(sql, valores)
+
+            # 8. Hacer commit para guardar los cambios
+            conexion.commit()
+
+            page.snack_bar = ft.SnackBar(
+                ft.Text("Factura guardada correctamente.", size=20),
+                bgcolor=ft.colors.GREEN_400, 
+                duration=3000,
+            )
+            page.snack_bar.open = True
+            page.update()
+
+        except Exception as e:
+            print(f"Error al guardar la factura: {e}")
+
+            page.snack_bar = ft.SnackBar(
+                ft.Text("Error al guardar la factura.", size=20),
+                bgcolor=ft.colors.RED_400,
+                duration=3000,
+            )
+            page.snack_bar.open = True
+            page.update()
+
+        finally:
+            # 9. Cerrar el cursor y la conexión
+            cursor.close()
+            conexion.close()
+        
+    guardar_db_button = ft.ElevatedButton(
+        text="Guardar Factura en BD", on_click=guardar_factura_db
+    )
+    def abrir_dialogo_pago(e):
+        """Abre el AlertDialog para gestionar el pago."""
+
+        def calcular_cambio(e):
+            """Calcula el cambio cuando cambia el valor de 'dinero_input'."""
+            try:
+                dinero_ingresado = float(dinero_input.value)
+                cambio = dinero_ingresado - float(total_value.value)
+                cambio_text.value = f"Cambio: {cambio:.2f}"
+            except ValueError:
+                cambio_text.value = "Ingresa un número válido"
+            page.update()
+
+        # Crear los controles del AlertDialog
+        dinero_input = ft.TextField(label="Dinero Ingresado", on_change=calcular_cambio)
+        cambio_text = ft.Text("Cambio: 0.00")
+        total_productos_text = ft.Text(f"Total de productos: {len(data_table.rows)}")
+
+        # Crear el AlertDialog
+        dlg = ft.AlertDialog(
+            modal=True,
+            title=ft.Text("Pago"),
+            content=ft.Column(
+                [
+                    dinero_input,
+                    cambio_text,
+                    total_productos_text,
+                ]
+            ),
+            actions=[
+                ft.ElevatedButton(
+                    text="Cerrar", 
+                    on_click=lambda e: (
+                        setattr(dlg, "open", False),  # Asignar False a dlg.open
+                        page.update()
+                    )
+                ),
+            ],
+        )
+
+        # Abrir el AlertDialog
+        page.dialog = dlg
+        dlg.open = True
+        page.update()
+        # --- Agregar los nuevos elementos a la página ---
+    boton_pago = ft.ElevatedButton(text="Procesar Pago", on_click=abrir_dialogo_pago)
     page.add(
         ft.Column(
             [
                 ft.Row([cedula,
                 nombre,
-                direccion,
+                direccion,boton_pago,
                 apellido,]),
                 generar_factura_button,
+                guardar_db_button,
                 telefono,
                 email,
                 ft.Row([id_producto, contenedor_de_totales]),
