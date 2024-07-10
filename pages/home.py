@@ -8,17 +8,19 @@ def HomePage(page: ft.Page):
     page.padding=0
     page.update()
     def go_to_page_two(e):
-        page.go("/inventario")
+        page.go("/Facturas")
         page.update()
     def go_to_page_three(e):
         # Elimina la página actual y agrega la interfaz de la página 2
-        page.go("/test")
+        page.go("/generar_facturas")
         page.update()
     def go_to_page_Four(e):
         # Elimina la página actual y agrega la interfaz de la página 2
+        page.go("/Clientes")
         page.update()
     def go_to_page_Five(e):
         # Elimina la página actual y agrega la interfaz de la página 2
+        page.go("/Inventario")
         page.update()
     def toggle_theme(e):
         if page.theme_mode == ft.ThemeMode.LIGHT:
@@ -103,7 +105,7 @@ def HomePage(page: ft.Page):
         border_radius=10,
         ink=True,
         border=ft.border.all(3,color='#e4e5eb'),
-        on_click="/generar_facturas",
+        on_click=go_to_page_three,
     )
     Contenedor_clientes=ft.Container(
         content=ft.Container(width=230,height=180,

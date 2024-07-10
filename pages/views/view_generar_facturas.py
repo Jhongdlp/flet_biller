@@ -1,7 +1,19 @@
 import flet as ft
 import re
+
 from components.rail import create_navigation_rail
 from sql.base_implemtnacion import get_product_data
+from datetime import datetime
+from xml.dom import minidom
+from reportlab.lib.pagesizes import letter
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from reportlab.lib.units import inch
+from reportlab.lib import colors
+import uuid
+import os
+import pymysql
+import xml.etree.ElementTree as ET
 
 def generar_factura_pro(page: ft.Page):
     #!==================================================================================
@@ -10,7 +22,7 @@ def generar_factura_pro(page: ft.Page):
     #!=                                                                                =
     #!==================================================================================    
     # Inicializar el color de fondo del contenedor y el modo de la página
-    page.theme_mode = ft.ThemeMode.LIGHT
+    #page.theme_mode = ft.ThemeMode.LIGHT
     page.padding=0
     Contenedor_rail =ft.Container(padding=0,
         width=140,
@@ -84,113 +96,11 @@ def generar_factura_pro(page: ft.Page):
         pattern = r'^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$'
         return re.match(pattern, email) is not None
 
-    def on_generar_factura_click(e):
-        """
-        Valida los campos y genera la factura XML y PDF si todo es correcto.
-        """
 
-        # Validar campos de cliente
-        error = False
-        if not cedula_cliente_texfield.value:
-            cedula_cliente_texfield.error_text = "Este campo es obligatorio"
-            cedula_cliente_texfield.error_style = ft.TextStyle(color=ft.colors.RED)
-            error = True
-        else:
-            cedula_cliente_texfield.error_text = None  # Limpiar error si se corrige
-
-        if not nombre_cliente_texfield.value:
-            nombre_cliente_texfield.error_text = "Este campo es obligatorio"
-            nombre_cliente_texfield.error_style = ft.TextStyle(color=ft.colors.RED)
-            error = True
-        else:
-            nombre_cliente_texfield.error_text = None
-
-        if not apellido_cliente_texfield.value:
-            apellido_cliente_texfield.error_text = "Este campo es obligatorio"
-            apellido_cliente_texfield.error_style = ft.TextStyle(color=ft.colors.RED)
-            error = True
-        else:
-            apellido_cliente_texfield.error_text = None
-
-        if not direccion_cliente_texfield.value:
-            direccion_cliente_texfield.error_text = "Este campo es obligatorio"
-            direccion_cliente_texfield.error_style = ft.TextStyle(color=ft.colors.RED)
-            error = True
-        else:
-            direccion_cliente_texfield.error_text = None
-
-        if not telefono_cliente_texfield.value:
-            telefono_cliente_texfield.error_text = "Este campo es obligatorio"
-            telefono_cliente_texfield.error_style = ft.TextStyle(color=ft.colors.RED)
-            error = True
-        else:
-            telefono_cliente_texfield.error_text = None
-
-        if not mail_cliente_texfield.value:
-            mail_cliente_texfield.error_text = "Este campo es obligatorio"
-            mail_cliente_texfield.error_style = ft.TextStyle(color=ft.colors.RED)
-            error = True
-        elif not is_valid_email(mail_cliente_texfield.value):
-            mail_cliente_texfield.error_text = "Ingrese un correo electrónico válido"
-            mail_cliente_texfield.error_style = ft.TextStyle(color=ft.colors.RED)
-            error = True
-        else:
-            mail_cliente_texfield.error_text = None
-
-        # Validar si hay productos en la tabla
-        if not data_table.rows:
-            page.snack_bar = ft.SnackBar(
-                ft.Text("No hay productos en la factura.", size=15),
-                bgcolor=ft.colors.RED_400,
-                duration=3000
-            )
-            page.snack_bar.open = True
-            error = True
-
-        # Actualizar la interfaz para mostrar los errores (si los hay)
-        page.update()
-
-        # Si no hay errores, continuar con la generación de la factura
-        if not error:
-            # ... (Lógica para generar factura XML y PDF usando los datos de los campos y la tabla)
-            print("¡Factura generada con éxito!") 
-
-    def on_change(e):
-        if cedula_cliente_texfield.error_text:
-            cedula_cliente_texfield.error_text = None
-            cedula_cliente_texfield.update()
-
-        if nombre_cliente_texfield.error_text:
-            nombre_cliente_texfield.error_text = None
-            nombre_cliente_texfield.update()
-
-        if apellido_cliente_texfield.error_text:
-            apellido_cliente_texfield.error_text = None
-            apellido_cliente_texfield.update()
-
-        if direccion_cliente_texfield.error_text:
-            direccion_cliente_texfield.error_text = None
-            direccion_cliente_texfield.update()
-
-        if telefono_cliente_texfield.error_text:
-            telefono_cliente_texfield.error_text = None
-            telefono_cliente_texfield.update()
-
-        if mail_cliente_texfield.error_text:
-            mail_cliente_texfield.error_text = None
-            mail_cliente_texfield.update()
-
-    # Asociar la función on_change al evento on_change de los TextField
-    cedula_cliente_texfield.on_change = on_change
-    nombre_cliente_texfield.on_change = on_change
-    apellido_cliente_texfield.on_change = on_change
-    direccion_cliente_texfield.on_change = on_change
-    telefono_cliente_texfield.on_change = on_change
-    mail_cliente_texfield.on_change = on_change
 
     subtotal_value = ft.Text(value="0.00")
     iva_value = ft.Text(value="0.00")
-    total_value = ft.Text(value="0.00")
+    total_value = ft.Text(value="0.00",weight=ft.FontWeight.W_900)
 
     data_table = ft.DataTable(
         width=800,
@@ -342,6 +252,279 @@ def generar_factura_pro(page: ft.Page):
 
     id_producto.on_submit = add_product
 
+   
+
+    def generar_factura_pdf(e):
+        """Genera un PDF con la estructura de una factura."""
+
+        # --- Datos de la empresa ---
+        nombre_empresa = "Tech Solutions Inc."
+        direccion_empresa = "Calle Falsa 123, Ciudad"
+        telefono_empresa = "+1-555-123-4567"
+        email_empresa = "info@techsolutions.com"
+
+        # --- Obtener datos del cliente ---
+        nombre_cliente = nombre_cliente_texfield.value + " " + apellido_cliente_texfield.value
+        cedula_cliente = cedula_cliente_texfield.value
+        direccion_cliente = direccion_cliente_texfield.value
+        # ... (Obtener otros datos del cliente)
+
+        # --- Generar código único para la factura ---
+        codigo_factura = str(uuid.uuid4())
+
+        # --- Obtener fecha y hora actual ---
+        fecha_emision = datetime.now().strftime("%Y-%m-%d")
+
+        # --- Crear carpeta "facturas" si no existe ---
+        if not os.path.exists("facturas"):
+            os.makedirs("facturas")
+
+        # --- Crear el documento PDF ---
+        nombre_archivo = os.path.join("facturas", f"factura_{codigo_factura}.pdf")
+        doc = SimpleDocTemplate(nombre_archivo, pagesize=letter)
+        elements = []
+
+        # --- Estilos ---
+        styles = getSampleStyleSheet()
+        styles.add(ParagraphStyle(name='FacturaTitle', fontSize=18, alignment=1))  # Título centrado
+        styles.add(ParagraphStyle(name='RightAlign', alignment=2))  # Alineación a la derecha
+
+        # --- Encabezado de la factura ---
+        elements.append(Paragraph(f"{nombre_empresa}", styles['FacturaTitle']))
+        elements.append(Spacer(1, 12))
+        elements.append(Paragraph(f"Dirección: {direccion_empresa}", styles['Normal']))
+        elements.append(Paragraph(f"Teléfono: {telefono_empresa}", styles['Normal']))
+        elements.append(Paragraph(f"Email: {email_empresa}", styles['Normal']))
+        elements.append(Spacer(1, 24))
+
+        # --- Información del cliente ---
+        elements.append(Paragraph("Factura a:", styles['Heading2']))
+        elements.append(Paragraph(f"Nombre: {nombre_cliente}", styles['Normal']))
+        elements.append(Paragraph(f"Cédula: {cedula_cliente}", styles['Normal']))
+        elements.append(Paragraph(f"Dirección: {direccion_cliente}", styles['Normal']))
+        elements.append(Spacer(1, 24))
+
+        # --- Detalles de la factura ---
+        elements.append(Paragraph(f"Factura No: {codigo_factura}", styles['Normal']))
+        elements.append(Paragraph(f"Fecha: {fecha_emision}", styles['Normal']))
+        elements.append(Spacer(1, 24))
+
+        # --- Tabla de productos ---
+        data = [["No.", "Descripción", "Cantidad", "Precio Unitario", "Total"]]
+        for i, row in enumerate(data_table.rows):
+            cantidad = float(row.cells[6].content.value)
+            precio = float(row.cells[5].content.value)
+            total = cantidad * precio
+            data.append([
+                i + 1,
+                row.cells[2].content.value,
+                cantidad,
+                f"{precio:.2f}",  # Formatear precio a 2 decimales
+                f"{total:.2f}"  # Formatear total a 2 decimales
+            ])
+
+        table = Table(data)
+        table.setStyle(TableStyle([
+            ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
+            ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+            ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+            ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+            ('BACKGROUND', (0, 1), (-1, -1), colors.beige),
+            ('GRID', (0, 0), (-1, -1), 1, colors.black)
+        ]))
+        elements.append(table)
+        elements.append(Spacer(1, 24))
+
+        # --- Totales ---
+        elements.append(Paragraph("Subtotal:", styles['RightAlign']))
+        elements.append(Paragraph(f"{subtotal_value.value}", styles['RightAlign']))
+        elements.append(Paragraph("IVA:", styles['RightAlign']))
+        elements.append(Paragraph(f"{iva_value.value}", styles['RightAlign']))
+        elements.append(Paragraph("Total:", styles['RightAlign']))
+        elements.append(Paragraph(f"{total_value.value}", styles['RightAlign']))
+
+        # ---  Mensaje final --- 
+        elements.append(Spacer(1, 24))
+        elements.append(Paragraph("¡Gracias por su compra!", styles['Normal']))
+
+        # --- Generar el PDF ---
+        doc.build(elements)
+
+    def generar_factura_xml(e):
+        # --- Generar código único para la factura ---
+        codigo_factura = str(uuid.uuid4())  # Usando UUID para un ID único
+
+        # --- Obtener fecha y hora actual ---
+        fecha_emision = datetime.now().strftime("%Y-%m-%dT%H:%M:%S")
+
+        # Crear el elemento raíz del XML
+        factura = ET.Element("Factura")
+        factura.set("xmlns", "urn:oasis:names:specification:ubl:schema:xsd:Invoice-2")
+        factura.set("xmlns:cac", "urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2")
+        factura.set("xmlns:cbc", "urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2")
+
+        # --- Agregar ID único y fecha de emisión a la factura ---
+        id_factura = ET.SubElement(factura, "cbc:ID")
+        id_factura.text = codigo_factura
+
+        fecha = ET.SubElement(factura, "cbc:IssueDate")
+        fecha.text = fecha_emision
+
+        # --- Información del emisor ---
+        emisor = ET.SubElement(factura, "cbc:AccountingSupplierParty")
+        party = ET.SubElement(emisor, "cac:Party")
+        nombre_emisor = ET.SubElement(party, "cac:PartyName")
+        nombre_emisor.text = "Jhon Guadalupe"
+        # ... (Agregar más información del emisor si es necesario)
+
+        # --- Información del cliente ---
+        receptor = ET.SubElement(factura, "cbc:AccountingCustomerParty")
+        party_receptor = ET.SubElement(receptor, "cac:Party")
+        nombre_receptor = ET.SubElement(party_receptor, "cac:PartyName")
+        nombre_receptor.text = nombre_cliente_texfield.value + " " + apellido_cliente_texfield.value
+        # ... (Agregar más información del cliente si es necesario)
+
+        # --- Líneas de la factura (productos) ---
+        for i, row in enumerate(data_table.rows):
+            linea_factura = ET.SubElement(factura, "cac:InvoiceLine", {"ID": str(i + 1)})
+
+            cantidad = ET.SubElement(linea_factura, "cbc:InvoicedQuantity")
+            cantidad.text = str(row.cells[6].content.value)  # Convertir a str
+
+            descripcion = ET.SubElement(linea_factura, "cbc:Description")
+            descripcion.text = row.cells[2].content.value
+
+            precio_unitario = ET.SubElement(linea_factura, "cac:Price")
+            precio_unitario.text = str(row.cells[5].content.value)  # Convertir a str
+
+        # --- Firma electrónica (simulada) ---
+        firma = ET.SubElement(factura, "FirmaElectronica")
+        firma.text = """-----BEGIN PKCS7-----
+    MIIGywYJKoZIhvcNAQcCoIIGszCCBrMCAQExCzAJBgkqhkiG9w0B
+    QIhFw0nYW1wbGUgQ29ycG9yYXRpb24xCzAJBgNVBAYTAlVTMQsw
+    CQYDVQQDDAJUZXN0MRUwEwYDVQQKDAxTeXN0dGVtcyBDbzCCASIw
+    DQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBANx/xxxxx/xxxxx
+    /xxxxx/xxxxx/xxxxx/xxxxx/xxxxx/xxxxx/xxxxx/xxxxx/xxxxx
+    /xxxxx/xxxxx/xxxxx/xxxxx/xxxxx/xxxxx/xxxxx/xxxxx/xxxxx
+    /xxxxx/xxxxx/xxxxx/xxxxx/xxxxx/xxxxx/xxxxx/xxxxx/xxxxx
+    /xxxxx/xxxxx/xxxxx/xxxxx/xxxxx/xxxxx/xxxxx/xxxxx/xxxxx
+    /xxxxx/xxxxx/xxxxx/xxxxx/xxxxx/xxxxx/xxxxx/xxxxx/xxxxx
+    -----END PKCS7-----""" 
+
+        # --- Convertir el XML a cadena con formato ---
+        xml_str = ET.tostring(factura, encoding="unicode")
+        xml_str = minidom.parseString(xml_str).toprettyxml(indent="  ")
+
+        print(xml_str)  # Imprimir el XML en la consola
+        # --- Crear carpeta "facturas" si no existe ---
+        if not os.path.exists("facturas"):
+            os.makedirs("facturas")
+
+        # --- Guardar el XML en la carpeta "facturas" ---
+        nombre_archivo = os.path.join("facturas", f"factura_{codigo_factura}.xml")
+        with open(nombre_archivo, "w") as f:
+            f.write(xml_str)
+
+    def guardar_factura_db(e):
+        """Guarda los datos de la factura en la base de datos."""
+
+        # 1. Obtener datos de la factura (incluyendo teléfono y email)
+        cedula_cliente = cedula_cliente_texfield.value
+        nombre_cliente = nombre_cliente_texfield.value
+        apellido_cliente = apellido_cliente_texfield.value
+        telefono_cliente = telefono_cliente_texfield.value
+        email_cliente = mail_cliente_texfield.value
+        fecha_factura = datetime.now().strftime("%Y-%m-%d")
+
+        # 2. Construir la cadena de productos
+        productos_str = ",".join(
+            [
+                f"{row.cells[1].content.value}.{row.cells[6].content.value}"
+                for row in data_table.rows
+            ]
+        )
+
+        # 3. Construir la cadena de totales
+        totales_str = f"{subtotal_value.value},{iva_value.value},{total_value.value}"
+
+        # 4. Conexión a la base de datos 
+        conexion = pymysql.connect(
+            host="localhost",
+            user="root",
+            password="",
+            database="billify"
+        )
+
+        try:
+            # 5. Crear un cursor
+            cursor = conexion.cursor()
+
+            # 6. Consulta SQL para insertar la factura (incluyendo teléfono y email)
+            sql = """
+                INSERT INTO facturas (cedula, nombre, apellido, telefono, 
+                                    email, fecha, productos, totales) 
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+            """
+            valores = (
+                cedula_cliente,
+                nombre_cliente,
+                apellido_cliente,
+                telefono_cliente,  # Nuevo campo
+                email_cliente,     # Nuevo campo
+                fecha_factura,
+                productos_str,
+                totales_str,
+            )
+
+            # 7. Ejecutar la consulta
+            cursor.execute(sql, valores)
+
+            # 8. Hacer commit para guardar los cambios
+            conexion.commit()
+
+            page.snack_bar = ft.SnackBar(
+                ft.Text("Factura guardada correctamente.", size=20),
+                bgcolor=ft.colors.GREEN_400, 
+                duration=3000,
+            )
+            page.snack_bar.open = True
+            page.update()
+
+        except Exception as e:
+            print(f"Error al guardar la factura: {e}")
+
+            page.snack_bar = ft.SnackBar(
+                ft.Text("Error al guardar la factura.", size=20),
+                bgcolor=ft.colors.RED_400,
+                duration=3000,
+            )
+            page.snack_bar.open = True
+            page.update()
+
+        finally:
+            # 9. Cerrar el cursor y la conexión
+            cursor.close()
+            conexion.close()
+    
+
+    def llamar_a_todas_las_funciones(e):
+        """Genera la factura XML y el PDF solo si hay productos."""
+
+        if data_table.rows:  # Verificar si hay filas en la tabla
+            generar_factura_xml(e)
+            generar_factura_pdf(e)
+            guardar_factura_db(e)
+        else:
+            # Mostrar un mensaje de error o alerta
+            page.snack_bar = ft.SnackBar(
+                ft.Text("No hay productos en la factura.", size=20),
+                bgcolor=ft.colors.RED_400,
+                duration=3000  # Mostrar por 3 segundos
+            )
+            page.snack_bar.open = True
+            page.update()
+
     def abrir_dialogo_pago(e):
         """Abre el AlertDialog para gestionar el pago."""
 
@@ -355,25 +538,65 @@ def generar_factura_pro(page: ft.Page):
                 cambio_text.value = "Ingresa un número válido"
             page.update()
 
+        def generar_factura_boton(e):
+            """Valida y genera la factura."""
+            try:
+                dinero_ingresado = float(dinero_input.value)
+                cambio = dinero_ingresado - float(total_value.value)
+                if dinero_input.value == "":
+                    dinero_input.error_text = "Este campo no puede estar vacío"
+                    page.update()
+                    return
+                if cambio < 0:
+                    cambio_text.value = "El cambio no puede ser negativo"
+                    page.update()
+                    return
+                # Aquí agregas la lógica para generar la factura
+                cambio_text.value = f"Factura generada con cambio: {cambio:.2f}"
+                llamar_a_todas_las_funciones(e)
+            except ValueError:
+                dinero_input.error_text = "Ingresa un número válido"
+            page.update()
+
+        def limpiar_error(e):
+            """Limpia el error del dinero_input cuando el usuario empieza a escribir."""
+            if dinero_input.error_text:
+                dinero_input.error_text = ""
+                page.update()
+
         # Crear los controles del AlertDialog
-        dinero_input = ft.TextField(label="Dinero Ingresado", on_change=calcular_cambio)
-        cambio_text = ft.Text("Cambio: 0.00")
+        dinero_input = ft.TextField(label="Dinero Ingresado", on_change=lambda e: (calcular_cambio(e), limpiar_error(e)))
+        cambio_text = ft.Text("Cambio: 0.00",weight=ft.FontWeight.W_900,size=20)
         total_productos_text = ft.Text(f"Total de productos: {len(data_table.rows)}")
 
         # Crear el AlertDialog
         dlg = ft.AlertDialog(
             modal=True,
-            title=ft.Text("Pago"),
-            content=ft.Column(
+            title=ft.Text("Efectua el pago: ",weight=ft.FontWeight.W_900),
+            content=ft.Container(
+                height=300,
+                content=ft.Column(
                 [
+                    ft.Divider(),
+                    ft.Column(spacing=0, controls=[
+                        ft.Row([ft.Text("Subtotal: "), subtotal_value]),
+                        ft.Row([ft.Text("Iva: "), iva_value]),
+                        ft.Row([ft.Text("Total: ",weight=ft.FontWeight.W_900), total_value]),
+                        ft.Divider(color=ft.colors.TRANSPARENT),
+                    ]),
                     dinero_input,
+                    ft.Divider(),
                     cambio_text,
                     total_productos_text,
-                ]
+                ])
             ),
             actions=[
                 ft.ElevatedButton(
-                    text="Cerrar", 
+                    text="Generar Factura",
+                    on_click=generar_factura_boton
+                ),
+                ft.ElevatedButton(
+                    text="Cerrar",
                     on_click=lambda e: (
                         setattr(dlg, "open", False),  # Asignar False a dlg.open
                         page.update()
@@ -439,8 +662,113 @@ def generar_factura_pro(page: ft.Page):
         page.dialog = alert_metodo_pago
         alert_metodo_pago.open = True
         page.update()
+
     
-   
+    def on_generar_factura_click(e):
+        """
+        Valida los campos y genera la factura XML y PDF si todo es correcto.
+        """
+
+        # Validar campos de cliente
+        error = False
+        if not cedula_cliente_texfield.value:
+            cedula_cliente_texfield.error_text = "Este campo es obligatorio"
+            cedula_cliente_texfield.error_style = ft.TextStyle(color=ft.colors.RED)
+            error = True
+        else:
+            cedula_cliente_texfield.error_text = None  # Limpiar error si se corrige
+
+        if not nombre_cliente_texfield.value:
+            nombre_cliente_texfield.error_text = "Este campo es obligatorio"
+            nombre_cliente_texfield.error_style = ft.TextStyle(color=ft.colors.RED)
+            error = True
+        else:
+            nombre_cliente_texfield.error_text = None
+
+        if not apellido_cliente_texfield.value:
+            apellido_cliente_texfield.error_text = "Este campo es obligatorio"
+            apellido_cliente_texfield.error_style = ft.TextStyle(color=ft.colors.RED)
+            error = True
+        else:
+            apellido_cliente_texfield.error_text = None
+
+        if not direccion_cliente_texfield.value:
+            direccion_cliente_texfield.error_text = "Este campo es obligatorio"
+            direccion_cliente_texfield.error_style = ft.TextStyle(color=ft.colors.RED)
+            error = True
+        else:
+            direccion_cliente_texfield.error_text = None
+
+        if not telefono_cliente_texfield.value:
+            telefono_cliente_texfield.error_text = "Este campo es obligatorio"
+            telefono_cliente_texfield.error_style = ft.TextStyle(color=ft.colors.RED)
+            error = True
+        else:
+            telefono_cliente_texfield.error_text = None
+
+        if not mail_cliente_texfield.value:
+            mail_cliente_texfield.error_text = "Este campo es obligatorio"
+            mail_cliente_texfield.error_style = ft.TextStyle(color=ft.colors.RED)
+            error = True
+        elif not is_valid_email(mail_cliente_texfield.value):
+            mail_cliente_texfield.error_text = "Ingrese un correo electrónico válido"
+            mail_cliente_texfield.error_style = ft.TextStyle(color=ft.colors.RED)
+            error = True
+        else:
+            mail_cliente_texfield.error_text = None
+
+        # Validar si hay productos en la tabla
+        if not data_table.rows:
+            page.snack_bar = ft.SnackBar(
+                ft.Text("No hay productos en la factura.", size=15),
+                bgcolor=ft.colors.RED_400,
+                duration=3000
+            )
+            page.snack_bar.open = True
+            error = True
+
+        # Actualizar la interfaz para mostrar los errores (si los hay)
+        page.update()
+
+        # Si no hay errores, continuar con la generación de la factura
+        if not error:
+            # ... (Lógica para generar factura XML y PDF usando los datos de los campos y la tabla)
+            print("¡Factura generada con éxito!") 
+            abrir_alert_metodo_pago(e)
+
+    def on_change(e):
+        if cedula_cliente_texfield.error_text:
+            cedula_cliente_texfield.error_text = None
+            cedula_cliente_texfield.update()
+
+        if nombre_cliente_texfield.error_text:
+            nombre_cliente_texfield.error_text = None
+            nombre_cliente_texfield.update()
+
+        if apellido_cliente_texfield.error_text:
+            apellido_cliente_texfield.error_text = None
+            apellido_cliente_texfield.update()
+
+        if direccion_cliente_texfield.error_text:
+            direccion_cliente_texfield.error_text = None
+            direccion_cliente_texfield.update()
+
+        if telefono_cliente_texfield.error_text:
+            telefono_cliente_texfield.error_text = None
+            telefono_cliente_texfield.update()
+
+        if mail_cliente_texfield.error_text:
+            mail_cliente_texfield.error_text = None
+            mail_cliente_texfield.update()
+
+    # Asociar la función on_change al evento on_change de los TextField
+    cedula_cliente_texfield.on_change = on_change
+    nombre_cliente_texfield.on_change = on_change
+    apellido_cliente_texfield.on_change = on_change
+    direccion_cliente_texfield.on_change = on_change
+    telefono_cliente_texfield.on_change = on_change
+    mail_cliente_texfield.on_change = on_change
+
     delete_all_button = ft.ElevatedButton(text="Eliminar todas las filas", on_click=delete_all_rows)
 
     Boton_consumirdor_final=ft.ElevatedButton("Consumidor final",width=158,height=35,bgcolor=ft.colors.GREEN_500,color="WHITE",
@@ -463,7 +791,7 @@ def generar_factura_pro(page: ft.Page):
             height=35,
             bgcolor=ft.colors.INDIGO_600,
             color=ft.colors.WHITE,
-            on_click=abrir_alert_metodo_pago
+            on_click=on_generar_factura_click
             ),
             ft.Divider(color=ft.colors.TRANSPARENT),
         ])
@@ -548,10 +876,10 @@ def generar_factura_pro(page: ft.Page):
                                                     controls=[
                                                         ft.Container(
                                                             width=320,
-                                                            height=215,
+                                                            height=150,
                                                             padding=0,
                                                             alignment=ft.alignment.bottom_center,
-                                                            #border=ft.border.all(),
+                                                            border=ft.border.all(),
                                                             content=ft.Row(spacing=6,controls=[
                                                                 Boton_Eliminar_Datos,
                                                                 Boton_consumirdor_final,
@@ -559,7 +887,7 @@ def generar_factura_pro(page: ft.Page):
                                                         ),
                                                         ft.Container(
                                                             width=180,
-                                                            height=215,
+                                                            height=150,
                                                             padding=0,
                                                             alignment=ft.alignment.bottom_center,
                                                             #sborder=ft.border.all(),

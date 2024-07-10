@@ -1,0 +1,51 @@
+<?xml version="1.0" ?>
+<Factura xmlns="urn:oasis:names:specification:ubl:schema:xsd:Invoice-2" xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2" xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2">
+  <cbc:ID>4fcc4027-d840-4d29-a1dd-6ad2f7ba48eb</cbc:ID>
+  <cbc:IssueDate>2024-07-10T01:24:54</cbc:IssueDate>
+  <cbc:AccountingSupplierParty>
+    <cac:Party>
+      <cac:PartyName>Jhon Guadalupe</cac:PartyName>
+    </cac:Party>
+  </cbc:AccountingSupplierParty>
+  <cbc:AccountingCustomerParty>
+    <cac:Party>
+      <cac:PartyName>andra Andrade</cac:PartyName>
+    </cac:Party>
+  </cbc:AccountingCustomerParty>
+  <cac:InvoiceLine ID="1">
+    <cbc:InvoicedQuantity>1</cbc:InvoicedQuantity>
+    <cbc:Description>Laptop ultrafina</cbc:Description>
+    <cac:Price>1200.0</cac:Price>
+  </cac:InvoiceLine>
+  <cac:InvoiceLine ID="2">
+    <cbc:InvoicedQuantity>1</cbc:InvoicedQuantity>
+    <cbc:Description>Smartphone avanzado</cbc:Description>
+    <cac:Price>899.99</cac:Price>
+  </cac:InvoiceLine>
+  <cac:InvoiceLine ID="3">
+    <cbc:InvoicedQuantity>1</cbc:InvoicedQuantity>
+    <cbc:Description>Tablet profesional</cbc:Description>
+    <cac:Price>799.5</cac:Price>
+  </cac:InvoiceLine>
+  <cac:InvoiceLine ID="4">
+    <cbc:InvoicedQuantity>1</cbc:InvoicedQuantity>
+    <cbc:Description>Cámara digital 4K</cbc:Description>
+    <cac:Price>699.0</cac:Price>
+  </cac:InvoiceLine>
+  <cac:InvoiceLine ID="5">
+    <cbc:InvoicedQuantity>1</cbc:InvoicedQuantity>
+    <cbc:Description>Auriculares inalámbricos</cbc:Description>
+    <cac:Price>249.99</cac:Price>
+  </cac:InvoiceLine>
+  <FirmaElectronica>-----BEGIN PKCS7-----
+    MIIGywYJKoZIhvcNAQcCoIIGszCCBrMCAQExCzAJBgkqhkiG9w0B
+    QIhFw0nYW1wbGUgQ29ycG9yYXRpb24xCzAJBgNVBAYTAlVTMQsw
+    CQYDVQQDDAJUZXN0MRUwEwYDVQQKDAxTeXN0dGVtcyBDbzCCASIw
+    DQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBANx/xxxxx/xxxxx
+    /xxxxx/xxxxx/xxxxx/xxxxx/xxxxx/xxxxx/xxxxx/xxxxx/xxxxx
+    /xxxxx/xxxxx/xxxxx/xxxxx/xxxxx/xxxxx/xxxxx/xxxxx/xxxxx
+    /xxxxx/xxxxx/xxxxx/xxxxx/xxxxx/xxxxx/xxxxx/xxxxx/xxxxx
+    /xxxxx/xxxxx/xxxxx/xxxxx/xxxxx/xxxxx/xxxxx/xxxxx/xxxxx
+    /xxxxx/xxxxx/xxxxx/xxxxx/xxxxx/xxxxx/xxxxx/xxxxx/xxxxx
+    -----END PKCS7-----</FirmaElectronica>
+</Factura>

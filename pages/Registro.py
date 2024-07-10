@@ -60,14 +60,14 @@ def RegistroPage(page: ft.Page):
             host="localhost",
             user="root",
             passwd="",
-            db="Billify"
+            db="billify"
         )
 
         # Crear un cursor para ejecutar consultas en la base de datos
         mcursor = bd.cursor()
 
         # Consultar la clave en la tabla LLAVE
-        sql = "SELECT LLAVE_STR FROM LLAVE"
+        sql = "SELECT LLAVE_STR FROM llave"
         mcursor.execute(sql)
         resultado = mcursor.fetchone()
         print(resultado)
@@ -96,7 +96,7 @@ def RegistroPage(page: ft.Page):
             host="localhost",
             user="root",
             passwd="",
-            db="Billify"
+            db="billify"
         )
 
         # Crear un cursor para ejecutar consultas en la base de datos
@@ -127,7 +127,7 @@ def RegistroPage(page: ft.Page):
             texto_desencriptado = texto_desencriptado_bytes.decode()
             print(f"este e sl texto desincriptado total: {texto_desencriptado}")
         # Crear una consulta SQL para insertar los datos del usuario en la base de datos
-        sql = "INSERT INTO REGISTRO(USUARIOS,CORREOS,CLAVES) VALUES('{0}', '{1}', '{2}')".format(usuario, correo_electronico, texto_encriptado.decode('utf-8'))
+        sql = "INSERT INTO registro(USUARIOS,CORREOS,CLAVES) VALUES('{0}', '{1}', '{2}')".format(usuario, correo_electronico, texto_encriptado.decode('utf-8'))
 
         # Ejecutar la consulta SQL
         try:

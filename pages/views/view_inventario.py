@@ -120,7 +120,7 @@ def clear_search_fields(event, page):
     search_product(event, page)
 
 def view_inventario_all(page: ft.Page):
-    page.theme_mode = ft.ThemeMode.LIGHT
+    #page.theme_mode = ft.ThemeMode.LIGHT
     page.padding=0
     global data_table, search_field, search_tip_prod_field, search_tip_esp_prod_field, pagination_controls
     page.title = "Paginación de Productos"

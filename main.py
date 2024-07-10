@@ -6,13 +6,13 @@ from pages.Registro import RegistroPage
 from pages.views.view_inventario import view_inventario_all
 from pages.views.view_clientes import view_clientes_all
 from pages.views.view_generar_facturas import generar_factura_pro
-from pages.views.view_facturas import inventario_page
+from pages.views.view_facturas import view_historial_factuas
 # Función principal
 def main(page: ft.Page):
     # Contenedor para las páginas
     page_container = ft.Container(expand=True)
 
-    # Función para actualizar el contenido de la página
+    # Función para actualizar el contsenido de la página
     def on_route_change(route):
         page_name = route.route.strip("/")
 
@@ -26,7 +26,7 @@ def main(page: ft.Page):
             page_container.content = HomePage(page)
             
         elif page_name == "Facturas":
-            page_container.content = inventario_page(page)
+            page_container.content = view_historial_factuas(page)
 
         elif page_name == "generar_facturas":
             page_container.content = generar_factura_pro(page)

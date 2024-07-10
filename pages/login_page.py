@@ -16,14 +16,14 @@ def Login_page(page: ft.Page):
             host="localhost",
             user="root",
             passwd="",
-            db="Billify"
+            db="billify"
         )
 
         # Crear un cursor para ejecutar consultas en la base de datos
         mcursor = bd.cursor()
 
         # Consultar la clave en la tabla LLAVE
-        sql = "SELECT LLAVE_STR FROM LLAVE"
+        sql = "SELECT LLAVE_STR FROM llave"
         mcursor.execute(sql)
         resultado = mcursor.fetchone()
         print(resultado)
@@ -58,7 +58,7 @@ def Login_page(page: ft.Page):
             host="localhost",
             user="root",
             passwd="",
-            db="Billify"
+            db="billify"
         )
 
         # Crear un cursor para ejecutar consultas en la base de datos
@@ -68,7 +68,7 @@ def Login_page(page: ft.Page):
         contraseña=Password.value
 
         # Crear una consulta SQL para obtener la contraseña del usuario de la base de datos
-        sql = "SELECT CLAVES FROM REGISTRO WHERE USUARIOS = '{}'".format(usuario)
+        sql = "SELECT CLAVES FROM registro WHERE USUARIOS = '{}'".format(usuario)
         # Ejecutar la consulta SQL
         mcursor.execute(sql)
         # Obtener el resultado de la consulta
@@ -291,7 +291,7 @@ def Login_page(page: ft.Page):
                                                                 ft.TextSpan(
                                                                     "Registrate",
                                                                     ft.TextStyle(decoration=ft.TextDecoration.UNDERLINE,color=ft.colors.BLUE),
-                                                                    on_click=lambda _: page.go("/registrarse/:idk"),
+                                                                    on_click=lambda _: page.go("/registro"),
                                                                     on_enter=highlight_link_registrarse,
                                                                     on_exit=unhighlight_link_registrarse,
 

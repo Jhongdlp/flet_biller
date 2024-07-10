@@ -1,7 +1,7 @@
 import flet as ft
 from components.rail import create_navigation_rail
 def view_clientes_all(page: ft.Page):
-    page.theme_mode = ft.ThemeMode.LIGHT
+    #page.theme_mode = ft.ThemeMode.LIGHT
     page.padding=0
     Contenedor_rail =ft.Container(padding=0,
         width=140,

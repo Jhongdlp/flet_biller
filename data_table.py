@@ -387,24 +387,6 @@ def main(page: ft.Page):
         with open(nombre_archivo, "w") as f:
             f.write(xml_str)
 
-    def generar_factura(e):
-        """Genera la factura XML y el PDF solo si hay productos."""
-
-        if data_table.rows:  # Verificar si hay filas en la tabla
-            generar_factura_xml(e)
-            generar_factura_pdf(e)
-        else:
-            # Mostrar un mensaje de error o alerta
-            page.snack_bar = ft.SnackBar(
-                ft.Text("No hay productos en la factura.", size=20),
-                bgcolor=ft.colors.RED_400,
-                duration=3000  # Mostrar por 3 segundos
-            )
-            page.snack_bar.open = True
-            page.update()
-    generar_factura_button = ft.ElevatedButton(
-        text="Generar Factura XML", on_click=generar_factura
-    )
     def guardar_factura_db(e):
         """Guarda los datos de la factura en la base de datos."""
 
@@ -489,6 +471,27 @@ def main(page: ft.Page):
     guardar_db_button = ft.ElevatedButton(
         text="Guardar Factura en BD", on_click=guardar_factura_db
     )
+    
+    def generar_factura(e):
+        """Genera la factura XML y el PDF solo si hay productos."""
+
+        if data_table.rows:  # Verificar si hay filas en la tabla
+            generar_factura_xml(e)
+            generar_factura_pdf(e)
+            guardar_factura_db(e)
+        else:
+            # Mostrar un mensaje de error o alerta
+            page.snack_bar = ft.SnackBar(
+                ft.Text("No hay productos en la factura.", size=20),
+                bgcolor=ft.colors.RED_400,
+                duration=3000  # Mostrar por 3 segundos
+            )
+            page.snack_bar.open = True
+            page.update()
+            
+    generar_factura_button = ft.ElevatedButton(
+        text="Generar Factura XML", on_click=generar_factura
+    )
     def abrir_dialogo_pago(e):
         """Abre el AlertDialog para gestionar el pago."""
 
@@ -534,7 +537,11 @@ def main(page: ft.Page):
         dlg.open = True
         page.update()
         # --- Agregar los nuevos elementos a la página ---
-    boton_pago = ft.ElevatedButton(text="Procesar Pago", on_click=abrir_dialogo_pago)
+    def generar_pago(e):
+        generar_factura_pdf
+        generar_factura_xml
+        guardar_factura_db
+    boton_pago = ft.ElevatedButton(text="Procesar Pago", on_click=generar_pago)
     page.add(
         ft.Column(
             [
