@@ -5,6 +5,7 @@
 </p>
 <p align="center">
   <img src="https://link-to-your-image" alt="Logo del Proyecto" width="300">
+  <a href="https://imgbb.com/"><img src="https://i.ibb.co/3dhpKBx/Logo.png" alt="Logo" border="0"></a>
 </p>
 </head>
 <body>
