@@ -1,11 +1,12 @@
+<p align="center">
+  <a href="https://imgbb.com/"><img src="https://i.ibb.co/3dhpKBx/Logo.png" alt="Logo" border="0"></a>
+</p>
 <h1 align="center">🧾 Facturador Electrónico</h1>
 <p align="center">
   <b>Proyecto Universitario de Gestión de Facturas y Productos</b><br>
   Desarrollado en Python con el framework Flet
 </p>
-<p align="center">
-  <a href="https://imgbb.com/"><img src="https://i.ibb.co/3dhpKBx/Logo.png" alt="Logo" border="0"></a>
-</p>
+
 </head>
 <body>
 
