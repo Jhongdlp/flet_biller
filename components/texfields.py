@@ -1,108 +1,63 @@
-import flet as ft
+def validar_ruc_ecuador(ruc):
+    """Verifica si un RUC ecuatoriano es válido."""
+    print(f"RUC recibido: {ruc}")
+    
+    # Verificar longitud y formato
+    if len(ruc) != 13 or not ruc.isdigit():
+        print("Error: Longitud o formato incorrecto")
+        return False
 
-def main(page):
-    page.title = "TextField Styles Demo"
+    # Verificar el tercer dígito (tipo de persona)
+    tipo_persona = int(ruc[2])
+    print(f"Tipo de persona: {tipo_persona}")
+    if tipo_persona not in [0, 1, 2, 3, 4, 5, 6, 9]:
+        print("Error: Tipo de persona inválido")
+        return False
 
-    # TextField básico
-    basic_textfield = ft.TextField(label="Basic TextField", hint_text="Enter text here")
+    # Determinar coeficientes y modulo según el tipo de persona
+    if tipo_persona in [0, 1, 2, 3, 4, 5]:  # Persona natural
+        coeficientes = [2, 1, 2, 1, 2, 1, 2, 1, 2]
+        modulo = 10
+        digito_verificador = int(ruc[9])  # Obtener el décimo dígito
+    elif tipo_persona == 6:  # Entidad pública
+        coeficientes = [3, 2, 7, 6, 5, 4, 3, 2]
+        modulo = 11
+        digito_verificador = int(ruc[8])  # Obtener el noveno dígito
+    elif tipo_persona == 9:  # Sociedad privada o extranjera
+        coeficientes = [4, 3, 2, 7, 6, 5, 4, 3, 2]
+        modulo = 11
+        digito_verificador = int(ruc[9])  # Obtener el décimo dígito
+    else:
+        print("Error: Tipo de persona inválido")
+        return False
 
-    # TextField con fondo relleno
-    filled_textfield = ft.TextField(label="Filled TextField", hint_text="Enter text here", filled=True)
+    print(f"Coeficientes usados: {coeficientes}")
 
-    # TextField con borde resaltado cuando está enfocado
-    focused_border_textfield = ft.TextField(
-        label="Focused Border TextField",
-        hint_text="Enter text here",
-        focused_border_color=ft.colors.BLUE,
-        focused_border_width=2
-    )
+    # Calcular la suma ponderada
+    suma = 0
+    for i in range(len(coeficientes)):
+        suma += int(ruc[i]) * coeficientes[i]
+    print(f"Suma ponderada: {suma}")
 
-    # TextField con diferentes colores de texto
-    colored_textfield = ft.TextField(
-        label="Colored TextField",
-        hint_text="Enter text here",
-        color=ft.colors.GREEN,
-        focused_color=ft.colors.RED
-    )
+    # Calcular el residuo
+    residuo = suma % modulo
+    print(f"Residuo: {residuo}")
 
-    # TextField con diferentes estilos de texto
-    styled_textfield = ft.TextField(
-        label="Styled TextField",
-        hint_text="Enter text here",
-        text_style=ft.TextStyle(size=20, weight="bold", color=ft.colors.PURPLE)
-    )
+    # Calcular el dígito verificador esperado
+    resultado = 0 if residuo == 0 else modulo - residuo
+    # En caso de tipo_persona == 9 y resultado == 10, debe ser 0
+    if tipo_persona == 9 and resultado == 10:
+        resultado = 0
+    print(f"Resultado (antes de validar el último dígito): {resultado}")
 
-    # TextField con icono
-    icon_textfield = ft.TextField(
-        label="Icon TextField",
-        hint_text="Enter text here",
-        icon=ft.icons.SEARCH
-    )
+    # Validar el dígito verificador
+    if resultado != digito_verificador:
+        print(f"Error: El dígito verificador no coincide: {resultado} != {digito_verificador}")
+        return False
 
-    # TextField con borde personalizado
-    custom_border_textfield = ft.TextField(
-        label="Custom Border TextField",
-        hint_text="Enter text here",
-        border=ft.InputBorder.OUTLINE,
-        border_color=ft.colors.ORANGE,
-        border_width=2,
-        border_radius=10
-    )
+    print("RUC válido")
+    return True
 
-    # TextField con fondo de diferentes colores en diferentes estados
-    state_color_textfield = ft.TextField(
-        label="State Color TextField",
-        hint_text="Enter text here",
-        fill_color=ft.colors.LIGHT_BLUE,
-        focused_bgcolor=ft.colors.LIGHT_GREEN,
-        bgcolor=ft.colors.LIGHT_BLUE
-    )
-
-    # TextField con padding personalizado
-    padded_textfield = ft.TextField(
-        label="Padded TextField",
-        hint_text="Enter text here",
-        content_padding=20
-    )
-
-    # TextField con un contador de caracteres
-    counter_textfield = ft.TextField(
-        label="Counter TextField",
-        hint_text="Enter text here",
-        counter_text="0/100",
-        counter_style=ft.TextStyle(size=12, color=ft.colors.RED)
-    )
-
-    # TextField con texto de ayuda
-    helper_textfield = ft.TextField(
-        #label="Helper TextField",
-        hint_text="Enter text here",
-        helper_text="This is a helper text",
-        helper_style=ft.TextStyle(size=12, color=ft.colors.LIGHT_GREEN_ACCENT_700)
-    )
-
-    # TextField con texto de error
-    error_textfield = ft.TextField(
-        #label="Error TextField",
-        hint_text="Enter text here",
-        error_text="This is an error text",
-        error_style=ft.TextStyle(size=12, color=ft.colors.RED)
-    )
-
-    # Agregar todos los TextFields a la página
-    page.add(
-        basic_textfield,
-        filled_textfield,
-        focused_border_textfield,
-        colored_textfield,
-        styled_textfield,
-        icon_textfield,
-        custom_border_textfield,
-        state_color_textfield,
-        padded_textfield,
-        counter_textfield,
-        helper_textfield,
-        error_textfield
-    )
-
-ft.app(target=main)
+# Ejemplo de prueba
+ruc = "1790012345001"
+validar_ruc_ecuador(ruc)
