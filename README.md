@@ -6,49 +6,9 @@
 <p align="center">
   <img src="https://link-to-your-image" alt="Logo del Proyecto" width="300">
 </p>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      line-height: 1.6;
-      max-width: 800px;
-      margin: 0 auto;
-      padding: 20px;
-      background-color: #f8f9fa;
-      color: #333;
-    }
-    h1 {
-      text-align: center;
-      color: #007bff;
-    }
-    h2 {
-      margin-bottom: 10px;
-      color: #28a745;
-    }
-    ul {
-      list-style-type: none;
-      padding-left: 0;
-    }
-    ul li {
-      margin-bottom: 10px;
-    }
-    .feature-list {
-      background-color: #fff;
-      border: 1px solid #ccc;
-      padding: 20px;
-      border-radius: 5px;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-    }
-    .requirements {
-      background-color: #fff;
-      border: 1px solid #ccc;
-      padding: 20px;
-      border-radius: 5px;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-    }
-  </style>
 </head>
 <body>
-  <h1>🧾 Facturador Electrónico</h1>
+
   
   <div class="feature-list">
     <h2>🚀 Características Destacadas</h2>
