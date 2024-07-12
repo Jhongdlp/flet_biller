@@ -6,12 +6,6 @@
 <p align="center">
   <img src="https://link-to-your-image" alt="Logo del Proyecto" width="300">
 </p>
-<!DOCTYPE html>
-<html lang="es">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>README - Facturador Electrónico</title>
   <style>
     body {
       font-family: Arial, sans-serif;
