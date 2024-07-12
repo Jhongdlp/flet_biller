@@ -139,7 +139,64 @@ def obtener_datos_cliente(escoger_identificador, cedula_campo_textfield, nombre_
     datos_cliente["email"] = mail_cliente_textfield.value
 
     return datos_cliente, None
+#------------------------FUNCION BUSCAR EN LA BASE DE DATOS-------------------------
+def buscar_clientes_por_cedula(page, cedula):
+    try:
+        connection = pymysql.connect(**db_config)
+        cursor = connection.cursor()
+        consulta = "SELECT * FROM clientes WHERE identificador = %s"
+        cursor.execute(consulta, (f"C.{cedula}",))
+        resultados = cursor.fetchall()
+        return resultados
+    except pymysql.Error as e:
+        print(f"Error al buscar clientes: {e}")
+        page.snack_bar = ft.SnackBar(ft.Text("Error al buscar clientes."))
+        page.snack_bar.open = True
+        page.update()
+        return []
+    finally:
+        if connection and connection.open:
+            cursor.close()
+            connection.close()
+#------------------------FUNCION BUSCAR EN LA BASE DE DATOS-------------------------
+def buscar_clientes_por_ruc(page, ruc):
+    try:
+        connection = pymysql.connect(**db_config)
+        cursor = connection.cursor()
+        consulta = "SELECT * FROM clientes WHERE identificador = %s"
+        cursor.execute(consulta, (f"R.{ruc}",))
+        resultados = cursor.fetchall()
+        return resultados
+    except pymysql.Error as e:
+        print(f"Error al buscar clientes: {e}")
+        page.snack_bar = ft.SnackBar(ft.Text("Error al buscar clientes."))
+        page.snack_bar.open = True
+        page.update()
+        return []
+    finally:
+        if connection and connection.open:
+            cursor.close()
+            connection.close()
 
+#------------------------FUNCION BUSCAR EN LA BASE DE DATOS-------------------------
+def buscar_clientes_por_pasaporte(page, pasaporte):
+    try:
+        connection = pymysql.connect(**db_config)
+        cursor = connection.cursor()
+        consulta = "SELECT * FROM clientes WHERE identificador = %s"
+        cursor.execute(consulta, (f"P.{pasaporte}",))
+        resultados = cursor.fetchall()
+        return resultados
+    except pymysql.Error as e:
+        print(f"Error al buscar clientes: {e}")
+        page.snack_bar = ft.SnackBar(ft.Text("Error al buscar clientes."))
+        page.snack_bar.open = True
+        page.update()
+        return []
+    finally:
+        if connection and connection.open:
+            cursor.close()
+            connection.close()  
 def main(page: ft.page):
 
     Contenedor_rail =ft.Container(padding=0,
@@ -153,6 +210,11 @@ def main(page: ft.page):
             )
     
     ) 
+
+    def limpiar_error_telefono(e):
+        if telefono_cliente_texfield.error_text: # Si hay un error...
+            telefono_cliente_texfield.error_text = None # ... se elimina
+            page.update() 
 
     def toggle_theme(e):
         if page.theme_mode == ft.ThemeMode.LIGHT:
@@ -201,6 +263,7 @@ def main(page: ft.page):
         content_padding=5,
         width=115,  
         height=35,     
+        on_change=lambda e: limpiar_error_telefono(e)
     )
     mail_cliente_texfield=ft.TextField(hint_text="Mail del cliente",
         content_padding=5,
@@ -289,156 +352,325 @@ def main(page: ft.page):
             if connection and connection.open:
                 cursor.close()
                 connection.close()
+    # --- TextFields para la búsqueda ---
+    buscar_cedula_textfield = ft.TextField(label="Buscar por cédula", width=250, on_submit=lambda e: buscar_cliente(e))
+    buscar_ruc_textfield = ft.TextField(label="Buscar por RUC", width=250,on_submit=lambda e: buscar_cliente(e))
+    buscar_pasaporte_textfield = ft.TextField(label="Buscar por pasaporte", width=250,on_submit=lambda e: buscar_cliente(e))
+    
+    # --- DataTable para mostrar los resultados ---
+    tabla_clientes = ft.DataTable(
+        columns=[
+            ft.DataColumn(ft.Text("ID")),
+            ft.DataColumn(ft.Text("Identificador")),
+            ft.DataColumn(ft.Text("Nombre y Apellido")),
+            ft.DataColumn(ft.Text("Teléfono")),
+            ft.DataColumn(ft.Text("Email"))
+        ],
+        rows=[]  # Inicialmente vacío
+    )
 
-    view_clientes=ft.Column([
-        ft.Container(
-            padding=0,
-            content=ft.Column(spacing=0,controls=[
-                ft.Container(height=60,width=1365,
-                    #border=ft.border.all(color='#737780'),  
-                    content=ft.Card(
-                        elevation=1,
-                        margin=5, 
-                        variant=ft.CardVariant.OUTLINED,
-                        content=ft.Row(spacing=0,controls=[
-                            ft.Container(height=60,width=320,
-                                #border=ft.border.only(right=ft.border.BorderSide(1, "#737780")),
-                                content=ft.Row([
-                                    ft.VerticalDivider(color=ft.colors.TRANSPARENT),
-                                    ft.Icon(name=ft.icons.GROUP_OUTLINED,size=40),
-                                    ft.VerticalDivider(),
-                                    ft.Text("Clientes",weight=ft.FontWeight.W_900,color='#3d5ff5',size=18),
-                                    #ft.Text("    "),
-                                    ft.VerticalDivider()
-                                ])
-                            ),
-                            ft.Container(height=60,width=320,
-                                #border=ft.border.only(right=ft.border.BorderSide(1, "#737780")),
-                                content=ft.Row([
-                                    ft.VerticalDivider(color=ft.colors.TRANSPARENT),
-                                    boton_dark_light_mode,
-                                ])
-                            )
-                        ]) 
-                    )          
-                ),
-            ])
-        ),
-        ft.Container(width=1365,height=650,
-            content=ft.Row(spacing=0,controls=[
-                Contenedor_rail,
-                ft.Container(width=1200,height=650,
-                    #border=ft.border.all(),
-                    alignment=ft.alignment.top_left,
-                    content=ft.Row(spacing=0,controls=[
-                        ft.Container(width=400,height=600,
-                            #border=ft.border.all(),
-                            #padding=5,
-                            alignment=ft.alignment.center,
-                            content=ft.Container(width=395,height=595,
-                                #border=ft.border.all(),
-                                content=ft.Card(elevation=10,
-                                    content=ft.Column([
-                                        ft.Container(width=395,
-                                            alignment=ft.alignment.center,
-                                            padding=10,
-                                            content=ft.Column([
-                                                ft.Text("    Agregar Cliente",weight=ft.FontWeight.W_900,size=25),
-                                                
-                                            ])
-                                        ),
-                                        ft.Divider(),
-                                        ft.Container(width=395,
-                                            alignment=ft.alignment.center,
-                                            padding=10,
-                                            content=ft.Column([
-                                                ft.Container(
-                                                    alignment=ft.alignment.center_left,
-                                                    content=ft.Row([
-                                                        ft.Column([
-                                                            ft.Text("Identificador:",weight=ft.FontWeight.W_900,size=14),
-                                                            ft.Row([
-                                                                Escoger_identificador,cedula_campo_texfild,
-                                                            ]),         
-                                                            
-                                                        ]),
-                                                ]),
-                                                ),
-                                                ft.Row([
-                                                    ft.Column([
-                                                        ft.Text("Nombre:",weight=ft.FontWeight.W_900,size=14),
-                                                        nombre_cliente_texfield
-                                                        
-                                                    ]),
-                                                    ft.Column([
-                                                        ft.Text("Apellido:",weight=ft.FontWeight.W_900,size=14),
-                                                        apellido_cliente_texfield
-                                                    ]),
+    def buscar_cliente(e):
+        # --- Obtener el término de búsqueda ---
+        if e.control == buscar_cedula_textfield:
+            termino_busqueda = buscar_cedula_textfield.value
+            resultados = buscar_clientes_por_cedula(page, termino_busqueda)
+        elif e.control == buscar_ruc_textfield:
+            termino_busqueda = buscar_ruc_textfield.value
+            resultados = buscar_clientes_por_ruc(page, termino_busqueda)
+        elif e.control == buscar_pasaporte_textfield:
+            termino_busqueda = buscar_pasaporte_textfield.value
+            resultados = buscar_clientes_por_pasaporte(page, termino_busqueda)
+        else:
+            print("Control de evento desconocido")  
+            return
+        
+        # --- Actualizar la tabla con los resultados ---
+        tabla_clientes.rows.clear()  # Limpiar resultados anteriores
 
-                                                ]),
-                                                ft.Column([
-                                                    ft.Text("Direccion:",weight=ft.FontWeight.W_900,size=14),
-                                                    direccion_cliente_texfield
-                                                    
-                                                ]),
-                                                ft.Row([
-                                                    ft.Column([
-                                                        ft.Text("Telefono:",weight=ft.FontWeight.W_900,size=14),
-                                                        telefono_cliente_texfield
-                                                        
-                                                    ]),
-                                                    ft.Column([
-                                                        ft.Text("mail:",weight=ft.FontWeight.W_900,size=14),
-                                                        mail_cliente_texfield
-                                                    ])
-                                                ]),
-                                                ft.Divider(height=3),
-                                                ft.Container(
-                                                    alignment=ft.alignment.top_right,
-                                                    content=ft.Row([
-                                                        ft.ElevatedButton("Limpiar",bgcolor=ft.colors.RED_600,color=ft.colors.WHITE),
-                                                        ft.ElevatedButton("Guardar cliente",bgcolor=ft.colors.GREEN_600,color=ft.colors.WHITE
-                                                            ,on_click=guardar_cliente
-                                                        ), 
-                                                    ],ft.MainAxisAlignment.END)
-                                                )
-                                                
-                                            ])            
-                                        ),
-                                    ])
-                                )                 
-                            )
-                        ),
-                        ft.Container(width=800,height=600,
-                            #border=ft.border.all(),
-                            alignment=ft.alignment.center,
-                            content=ft.Column([
-                                ft.Container(width=795,
-                                    #height=50,
-                                    border=ft.border.all(),
-                                    padding=10,
-                                    content=ft.Container(
-                                        ft.Column([
-                                            ft.Text("Busca a un cliente:",weight=ft.FontWeight.W_900,size=25),
-                                            ft.Row([
-                                                ft.TextField(label="Bucar por cedula",width=250),
-                                                ft.TextField(label="Bucar por RUC",width=250),
-                                                ft.TextField(label="Bucar por pasaporte",width=250),
-                                            ])
-                                        ]),
-                                        
-                                    )                 
-                                ),
-                                ft.Container(width=795
-                                    #!PONER AQUI EL DATATABLE DE LA GENERACION DE LA BUSQUEDA
-                                )
-                            ])
-                        ),
-                    ])
-
+        if resultados:
+            for resultado in resultados:
+                tabla_clientes.rows.append(
+                    ft.DataRow(
+                        cells=[
+                            ft.DataCell(ft.Text(resultado[0])),  # ID
+                            ft.DataCell(ft.Text(resultado[1])),  # Identificador
+                            ft.DataCell(ft.Text(resultado[2])),  # Nombre y Apellido
+                            ft.DataCell(ft.Text(resultado[4])),  # Teléfono
+                            ft.DataCell(ft.Text(resultado[5]))   # Email
+                        ]
+                    )
                 )
-            ],alignment=ft.MainAxisAlignment.START)
-        )
+        else:
+            # Mostrar SnackBar si no hay resultados
+            page.snack_bar = ft.SnackBar(ft.Text("No se encontraron clientes con ese término de búsqueda."))
+            page.snack_bar.open = True
+            page.update()
+
+        page.update()
+    page.update()
+    def limpiar_busqueda(e):
+        buscar_cedula_textfield.value = ""
+        buscar_ruc_textfield.value = ""
+        buscar_pasaporte_textfield.value = ""
+        tabla_clientes.rows.clear()
+        page.update()
+    view_clientes = ft.Column(
+        [
+            ft.Container(
+                padding=0,
+                content=ft.Column(
+                    spacing=0,
+                    controls=[
+                        ft.Container(
+                            height=60,
+                            width=1365,
+                            # border=ft.border.all(color='#737780'),
+                            content=ft.Card(
+                                elevation=1,
+                                margin=5,
+                                variant=ft.CardVariant.OUTLINED,
+                                content=ft.Row(
+                                    spacing=0,
+                                    controls=[
+                                        ft.Container(
+                                            height=60,
+                                            width=320,
+                                            # border=ft.border.only(right=ft.border.BorderSide(1, "#737780")),
+                                            content=ft.Row(
+                                                [
+                                                    ft.VerticalDivider(color=ft.colors.TRANSPARENT),
+                                                    ft.Icon(name=ft.icons.GROUP_OUTLINED, size=40),
+                                                    ft.VerticalDivider(),
+                                                    ft.Text(
+                                                        "Clientes",
+                                                        weight=ft.FontWeight.W_900,
+                                                        color="#3d5ff5",
+                                                        size=18,
+                                                    ),
+                                                    # ft.Text("    "),
+                                                    ft.VerticalDivider(),
+                                                ]
+                                            ),
+                                        ),
+                                        ft.Container(
+                                            height=60,
+                                            width=320,
+                                            # border=ft.border.only(right=ft.border.BorderSide(1, "#737780")),
+                                            content=ft.Row(
+                                                [
+                                                    ft.VerticalDivider(color=ft.colors.TRANSPARENT),
+                                                    boton_dark_light_mode,
+                                                    ft.ElevatedButton("limpiar",on_click=lambda e: limpiar_busqueda(e)),
+                                                ]
+                                            ),
+                                        ),
+                                    ]
+                                ),
+                            ),
+                        ),
+                    ],
+                ),
+            ),
+            ft.Container(
+                width=1365,
+                height=650,
+                content=ft.Row(
+                    spacing=0,
+                    controls=[
+                        Contenedor_rail,
+                        ft.Container(
+                            width=1200,
+                            height=650,
+                            # border=ft.border.all(),
+                            alignment=ft.alignment.top_left,
+                            content=ft.Row(
+                                spacing=0,
+                                controls=[
+                                    ft.Container(
+                                        width=400,
+                                        height=600,
+                                        # border=ft.border.all(),
+                                        # padding=5,
+                                        alignment=ft.alignment.center,
+                                        content=ft.Container(
+                                            width=395,
+                                            height=595,
+                                            # border=ft.border.all(),
+                                            content=ft.Card(
+                                                elevation=10,
+                                                content=ft.Column(
+                                                    [
+                                                        ft.Container(
+                                                            width=395,
+                                                            alignment=ft.alignment.center,
+                                                            padding=10,
+                                                            content=ft.Column(
+                                                                [
+                                                                    ft.Text(
+                                                                        "    Agregar Cliente",
+                                                                        weight=ft.FontWeight.W_900,
+                                                                        size=25,
+                                                                    ),
+                                                                ]
+                                                            ),
+                                                        ),
+                                                        ft.Divider(),
+                                                        ft.Container(
+                                                            width=395,
+                                                            alignment=ft.alignment.center,
+                                                            padding=10,
+                                                            content=ft.Column(
+                                                                [
+                                                                    ft.Container(
+                                                                        alignment=ft.alignment.center_left,
+                                                                        content=ft.Row(
+                                                                            [
+                                                                                ft.Column(
+                                                                                    [
+                                                                                        ft.Text(
+                                                                                            "Identificador:",
+                                                                                            weight=ft.FontWeight.W_900,
+                                                                                            size=14,
+                                                                                        ),
+                                                                                        ft.Row(
+                                                                                            [
+                                                                                                Escoger_identificador,
+                                                                                                cedula_campo_texfild,
+                                                                                            ]
+                                                                                        ),
+                                                                                    ]
+                                                                                ),
+                                                                            ]
+                                                                        ),
+                                                                    ),
+                                                                    ft.Row(
+                                                                        [
+                                                                            ft.Column(
+                                                                                [
+                                                                                    ft.Text(
+                                                                                        "Nombre:",
+                                                                                        weight=ft.FontWeight.W_900,
+                                                                                        size=14,
+                                                                                    ),
+                                                                                    nombre_cliente_texfield,
+                                                                                ]
+                                                                            ),
+                                                                            ft.Column(
+                                                                                [
+                                                                                    ft.Text(
+                                                                                        "Apellido:",
+                                                                                        weight=ft.FontWeight.W_900,
+                                                                                        size=14,
+                                                                                    ),
+                                                                                    apellido_cliente_texfield,
+                                                                                ]
+                                                                            ),
+                                                                        ]
+                                                                    ),
+                                                                    ft.Column(
+                                                                        [
+                                                                            ft.Text(
+                                                                                "Direccion:",
+                                                                                weight=ft.FontWeight.W_900,
+                                                                                size=14,
+                                                                            ),
+                                                                            direccion_cliente_texfield,
+                                                                        ]
+                                                                    ),
+                                                                    ft.Row(
+                                                                        [
+                                                                            ft.Column(
+                                                                                [
+                                                                                    ft.Text(
+                                                                                        "Telefono:",
+                                                                                        weight=ft.FontWeight.W_900,
+                                                                                        size=14,
+                                                                                    ),
+                                                                                    telefono_cliente_texfield,
+                                                                                ]
+                                                                            ),
+                                                                            ft.Column(
+                                                                                [
+                                                                                    ft.Text(
+                                                                                        "mail:",
+                                                                                        weight=ft.FontWeight.W_900,
+                                                                                        size=14,
+                                                                                    ),
+                                                                                    mail_cliente_texfield,
+                                                                                ]
+                                                                            ),
+                                                                        ]
+                                                                    ),
+                                                                    ft.Divider(height=3),
+                                                                    ft.Container(
+                                                                        alignment=ft.alignment.top_right,
+                                                                        content=ft.Row(
+                                                                            [
+                                                                                ft.ElevatedButton(
+                                                                                    "Limpiar",
+                                                                                    bgcolor=ft.colors.RED_600,
+                                                                                    color=ft.colors.WHITE,
+                                                                                ),
+                                                                                ft.ElevatedButton(
+                                                                                    "Guardar cliente",
+                                                                                    bgcolor=ft.colors.GREEN_600,
+                                                                                    color=ft.colors.WHITE,
+                                                                                    on_click=guardar_cliente,
+                                                                                ),
+                                                                            ],
+                                                                            ft.MainAxisAlignment.END,
+                                                                        ),
+                                                                    ),
+                                                                ]
+                                                            ),
+                                                        ),
+                                                    ],
+                                                )
+                                            ),
+                                        ),
+                                    ),
+                                    ft.Container(
+                                        width=800,
+                                        height=600,
+                                        # border=ft.border.all(),
+                                        alignment=ft.alignment.center,
+                                        content=ft.Column(
+                                            [
+                                                ft.Container(
+                                                    width=795,
+                                                    # height=50,
+                                                    border=ft.border.all(),
+                                                    padding=10,
+                                                    content=ft.Container(
+                                                        ft.Column(
+                                                            [
+                                                                ft.Text(
+                                                                    "Busca a un cliente:",
+                                                                    weight=ft.FontWeight.W_900,
+                                                                    size=25,
+                                                                ),
+                                                                ft.Row(
+                                                                    [
+                                                                        buscar_cedula_textfield,
+                                                                        buscar_ruc_textfield,
+                                                                        buscar_pasaporte_textfield,
+                                                                    ]
+                                                                ),
+                                                            ]
+                                                        ),
+                                                    ),
+                                                ),
+                                                ft.Container(width=795, content=tabla_clientes),
+                                            ]
+                                        ),
+                                    ),
+                                ],
+                            ),
+                        ),
+                    ],
+                    alignment=ft.MainAxisAlignment.START,
+                ),
+            ),
         ]
     )
     page.add(view_clientes)
