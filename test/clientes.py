@@ -15,11 +15,28 @@ def validar_cedula_ecuador(cedula):
     """Verifica si una cédula ecuatoriana es válida."""
     if len(cedula) != 10 or not cedula.isdigit():
         return False
+    
+    # Verificar el código de provincia
+    provincia = int(cedula[0:2])
+    if provincia < 1 or provincia > 24:
+        return False
+    
     coeficientes = [2, 1, 2, 1, 2, 1, 2, 1, 2]
     digito_verificador = int(cedula[9])
-    suma = sum([int(cedula[i]) * coeficientes[i] if int(cedula[i]) * coeficientes[i] < 10 else int(cedula[i]) * coeficientes[i] - 9 for i in range(9)])
+    suma = 0
+    
+    for i in range(9):
+        producto = int(cedula[i]) * coeficientes[i]
+        if producto >= 10:
+            producto -= 9
+        suma += producto
+    
     resultado = 10 - (suma % 10)
+    if resultado == 10:
+        resultado = 0
+    
     return resultado == digito_verificador
+
 
 def validar_ruc_ecuador(ruc):
     """Verifica si un RUC ecuatoriano es válido."""
@@ -215,6 +232,14 @@ def main(page: ft.page):
         if telefono_cliente_texfield.error_text: # Si hay un error...
             telefono_cliente_texfield.error_text = None # ... se elimina
             page.update() 
+    def limpiar_error_mail(e):
+        if mail_cliente_texfield.error_text: # Si hay un error...
+            mail_cliente_texfield.error_text = None # ... se elimina
+            page.update() 
+    def limpiar_error_identificador(e):
+        if cedula_campo_texfild.error_text: # Si hay un error...
+            cedula_campo_texfild.error_text = None # ... se elimina
+            page.update() 
 
     def toggle_theme(e):
         if page.theme_mode == ft.ThemeMode.LIGHT:
@@ -233,21 +258,32 @@ def main(page: ft.page):
         on_click=toggle_theme
     )
     cedula_campo_texfild = ft.TextField(
-        hint_text="Cedula", 
+        hint_text="identificador", 
         content_padding=5, 
         width=250,
         height=35, 
+        on_change=lambda e: limpiar_error_identificador(e)
 
     ) 
     nombre_cliente_texfield=ft.TextField(hint_text="Nombre del cliente",
         content_padding=5,
         width=175,  
-        height=35,           
+        height=35,  
+        input_filter=ft.InputFilter(
+            allow=True,
+            regex_string=r"[a-zA-Z\s]",  # Letras minúsculas, mayúsculas y espacios
+            replacement_string="",
+        ),         
     )   
     apellido_cliente_texfield=ft.TextField(hint_text="Apellido del cliente",
         content_padding=5,
         width=175,
-        height=35
+        height=35,
+        input_filter=ft.InputFilter(
+            allow=True,
+            regex_string=r"[a-zA-Z\s]",  # Letras minúsculas, mayúsculas y espacios
+            replacement_string="",
+        ),
     )
     direccion_cliente_texfield=ft.TextField(hint_text="Direccion",
         content_padding=5,
@@ -268,7 +304,8 @@ def main(page: ft.page):
     mail_cliente_texfield=ft.TextField(hint_text="Mail del cliente",
         content_padding=5,
         width=240,
-        height=35
+        height=35,
+        on_change=lambda e: limpiar_error_mail(e)
     )
     Escoger_identificador=ft.Dropdown(
         width=100,
@@ -278,7 +315,7 @@ def main(page: ft.page):
             ft.dropdown.Option("Cedula"),
             ft.dropdown.Option("RUC"),
             ft.dropdown.Option("Pasaporte"),
-        ],
+        ],     
     )
 
     def guardar_cliente(e):
@@ -353,10 +390,21 @@ def main(page: ft.page):
                 cursor.close()
                 connection.close()
     # --- TextFields para la búsqueda ---
-    buscar_cedula_textfield = ft.TextField(label="Buscar por cédula", width=250, on_submit=lambda e: buscar_cliente(e))
-    buscar_ruc_textfield = ft.TextField(label="Buscar por RUC", width=250,on_submit=lambda e: buscar_cliente(e))
-    buscar_pasaporte_textfield = ft.TextField(label="Buscar por pasaporte", width=250,on_submit=lambda e: buscar_cliente(e))
+    buscar_cedula_textfield = ft.TextField(label="Buscar por cédula", width=250, on_submit=lambda e: buscar_cliente(e)
+        ,max_length=10
+    )
+    buscar_ruc_textfield = ft.TextField(label="Buscar por RUC", width=250,on_submit=lambda e: buscar_cliente(e),max_length=13)
+    buscar_pasaporte_textfield = ft.TextField(label="Buscar por pasaporte", width=250,on_submit=lambda e: buscar_cliente(e),max_length=30)
     
+    def Limpiar_agregar_clientes(e):
+        cedula_campo_texfild.value = ""
+        nombre_cliente_texfield.value = ""
+        apellido_cliente_texfield.value = ""
+        direccion_cliente_texfield.value = ""
+        telefono_cliente_texfield.value = ""
+        mail_cliente_texfield.value = ""
+
+        page.update()
     # --- DataTable para mostrar los resultados ---
     tabla_clientes = ft.DataTable(
         columns=[
@@ -408,12 +456,14 @@ def main(page: ft.page):
 
         page.update()
     page.update()
+
     def limpiar_busqueda(e):
         buscar_cedula_textfield.value = ""
         buscar_ruc_textfield.value = ""
         buscar_pasaporte_textfield.value = ""
         tabla_clientes.rows.clear()
         page.update()
+
     view_clientes = ft.Column(
         [
             ft.Container(
@@ -491,10 +541,10 @@ def main(page: ft.page):
                                         height=600,
                                         # border=ft.border.all(),
                                         # padding=5,
-                                        alignment=ft.alignment.center,
+                                        alignment=ft.alignment.top_center,
                                         content=ft.Container(
                                             width=395,
-                                            height=595,
+                                            height=530,
                                             # border=ft.border.all(),
                                             content=ft.Card(
                                                 elevation=10,
@@ -507,7 +557,7 @@ def main(page: ft.page):
                                                             content=ft.Column(
                                                                 [
                                                                     ft.Text(
-                                                                        "    Agregar Cliente",
+                                                                        "  Agregar Cliente",
                                                                         weight=ft.FontWeight.W_900,
                                                                         size=25,
                                                                     ),
@@ -610,6 +660,7 @@ def main(page: ft.page):
                                                                                     "Limpiar",
                                                                                     bgcolor=ft.colors.RED_600,
                                                                                     color=ft.colors.WHITE,
+                                                                                    on_click=Limpiar_agregar_clientes
                                                                                 ),
                                                                                 ft.ElevatedButton(
                                                                                     "Guardar cliente",
@@ -639,7 +690,7 @@ def main(page: ft.page):
                                                 ft.Container(
                                                     width=795,
                                                     # height=50,
-                                                    border=ft.border.all(),
+                                                    #border=ft.border.all(),
                                                     padding=10,
                                                     content=ft.Container(
                                                         ft.Column(
@@ -656,6 +707,7 @@ def main(page: ft.page):
                                                                         buscar_pasaporte_textfield,
                                                                     ]
                                                                 ),
+                                                                ft.Divider(),
                                                             ]
                                                         ),
                                                     ),

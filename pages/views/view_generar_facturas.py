@@ -59,7 +59,7 @@ def generar_factura_pro(page: ft.Page):
     #!=================TEXFIELDS==================
     # Definir la función que se ejecutará al cambiar el texto
 
-    cedula_cliente_texfield=ft.TextField(label=("Cedula"),width=230,height=45,
+    cedula_cliente_texfield=ft.TextField(label=("Identificador"),width=230,height=45,
         input_filter=ft.InputFilter(allow=True, regex_string=r"[0-9]", replacement_string=""),
         error_text=None,  # No mostrar error inicialmente
     )
@@ -252,16 +252,16 @@ def generar_factura_pro(page: ft.Page):
 
     id_producto.on_submit = add_product
 
-   
+
 
     def generar_factura_pdf(e):
         """Genera un PDF con la estructura de una factura."""
 
         # --- Datos de la empresa ---
-        nombre_empresa = "Tech Solutions Inc."
-        direccion_empresa = "Calle Falsa 123, Ciudad"
-        telefono_empresa = "+1-555-123-4567"
-        email_empresa = "info@techsolutions.com"
+        nombre_empresa = "Super Compra Inc."
+        direccion_empresa = "Cacha y Jose Andrango 123, Quito"
+        telefono_empresa = "+593-098-3853-500"
+        email_empresa = "supercompra@gruposuper.com"
 
         # --- Obtener datos del cliente ---
         nombre_cliente = nombre_cliente_texfield.value + " " + apellido_cliente_texfield.value
@@ -507,6 +507,55 @@ def generar_factura_pro(page: ft.Page):
             cursor.close()
             conexion.close()
     
+    
+    def eliminar_todo(e):
+        delete_all_rows(e)
+        cedula_cliente_texfield.value=""
+        nombre_cliente_texfield.value=""
+        apellido_cliente_texfield.value=""
+        direccion_cliente_texfield.value=""
+        telefono_cliente_texfield.value=""
+        mail_cliente_texfield.value=""
+        cedula_cliente_texfield.read_only=False
+        nombre_cliente_texfield.read_only=False
+        apellido_cliente_texfield.read_only=False
+        direccion_cliente_texfield.read_only=False
+        telefono_cliente_texfield.read_only=False
+        mail_cliente_texfield.read_only=False
+        on_change(e)
+        page.update()
+    
+    def limpiar_datos_clientes(e):
+        cedula_cliente_texfield.value=""
+        nombre_cliente_texfield.value=""
+        apellido_cliente_texfield.value=""
+        direccion_cliente_texfield.value=""
+        telefono_cliente_texfield.value=""
+        mail_cliente_texfield.value=""
+        cedula_cliente_texfield.read_only=False
+        nombre_cliente_texfield.read_only=False
+        apellido_cliente_texfield.read_only=False
+        direccion_cliente_texfield.read_only=False
+        telefono_cliente_texfield.read_only=False
+        mail_cliente_texfield.read_only=False
+        on_change(e)
+        page.update()
+
+    def consumidor_final(e):
+        cedula_cliente_texfield.value="0000000000"
+        nombre_cliente_texfield.value="**************"
+        apellido_cliente_texfield.value="**************"
+        direccion_cliente_texfield.value="*****************"
+        telefono_cliente_texfield.value="0000000000"
+        mail_cliente_texfield.value="consumidorfinal@consumidorfinal.com"
+        cedula_cliente_texfield.read_only=True
+        nombre_cliente_texfield.read_only=True
+        apellido_cliente_texfield.read_only=True
+        direccion_cliente_texfield.read_only=True
+        telefono_cliente_texfield.read_only=True
+        mail_cliente_texfield.read_only=True
+        on_change(e)
+        page.update()
 
     def llamar_a_todas_las_funciones(e):
         """Genera la factura XML y el PDF solo si hay productos."""
@@ -554,6 +603,7 @@ def generar_factura_pro(page: ft.Page):
                 # Aquí agregas la lógica para generar la factura
                 cambio_text.value = f"Factura generada con cambio: {cambio:.2f}"
                 llamar_a_todas_las_funciones(e)
+                eliminar_todo(e)
             except ValueError:
                 dinero_input.error_text = "Ingresa un número válido"
             page.update()
@@ -772,10 +822,10 @@ def generar_factura_pro(page: ft.Page):
     delete_all_button = ft.ElevatedButton(text="Eliminar todas las filas", on_click=delete_all_rows)
 
     Boton_consumirdor_final=ft.ElevatedButton("Consumidor final",width=158,height=35,bgcolor=ft.colors.GREEN_500,color="WHITE",
-        #on_click=Boton_Consumidor_final_logica
+        on_click=consumidor_final
         )
     Boton_Eliminar_Datos=ft.ElevatedButton("Eliminar Datos",width=147,height=35,bgcolor=ft.colors.RED,color=ft.colors.WHITE,
-        #on_click=Boton_Eliminar_Datos_logica
+        on_click=eliminar_todo
         )
     card_totales_generar=ft.Card(elevation=5,content=ft.Container(
         width=170,
@@ -841,7 +891,10 @@ def generar_factura_pro(page: ft.Page):
                             ft.Container(width=500,height=600,
                                 #border=ft.border.all(),
                                 content=ft.Column(spacing=0,controls=[
-                                    ft.Text("Datos de cliente",size=25),
+                                    ft.Row(spacing=0,controls=[
+                                        ft.Text("Datos de cliente",size=25),
+                                        ft.ElevatedButton(text="Limpiar",on_click=limpiar_datos_clientes),
+                                    ],alignment=ft.MainAxisAlignment.SPACE_BETWEEN),
                                     ft.Divider(),
                                         ft.Row(spacing=0,controls=[
                                             cedula_cliente_texfield,
@@ -879,7 +932,7 @@ def generar_factura_pro(page: ft.Page):
                                                             height=150,
                                                             padding=0,
                                                             alignment=ft.alignment.bottom_center,
-                                                            border=ft.border.all(),
+                                                            #border=ft.border.all(),
                                                             content=ft.Row(spacing=6,controls=[
                                                                 Boton_Eliminar_Datos,
                                                                 Boton_consumirdor_final,

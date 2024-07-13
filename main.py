@@ -46,7 +46,7 @@ def main(page: ft.Page):
     page.add(page_container)
 
     # Navegar a la página inicial
-    page.go("/")
+    page.go("/home")
 
 # Ejecutar la aplicación
 ft.app(target=main,view=ft.AppView.WEB_BROWSER)
