@@ -28,20 +28,27 @@
       <li>MySQL Server</li>
     </ul>
   </div>
-  <div<
-        ```bash
-      pip install flet
-      ```
-
-      and run the program:
-
-      ```bash
-      python counter.py
-      ```
-  </div>
-
 </body>
 </html>
 
+  Instala flet para comenzar:
+        ```bash
+      pip install flet
+      ```
+  Instala todas las dependencias del programa:
+        
+        ```bash
+      pip install fernet
+      pip install xml
+      pip install reportlab
+      pip install pymysql
+      
+      ```
+  
+      Y inicia el programa con:
+
+      ```bash
+      python main.py
+      ```
 
 
