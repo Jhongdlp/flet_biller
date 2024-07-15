@@ -8,13 +8,13 @@ from datetime import datetime
 from xml.dom import minidom
 
 from reportlab.lib.pagesizes import letter
-from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle
-from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
-from reportlab.lib.units import inch
 from reportlab.lib import colors
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, Image
 
-import uuid
 import os
+import uuid
+
 import pymysql
 import xml.etree.ElementTree as ET
 
@@ -269,6 +269,8 @@ def generar_factura_pro(page: ft.Page):
 
 
 
+   
+    
     def generar_factura_pdf(e):
         """Genera un PDF con la estructura de una factura."""
 
@@ -277,6 +279,7 @@ def generar_factura_pro(page: ft.Page):
         direccion_empresa = "Cacha y Jose Andrango 123, Quito"
         telefono_empresa = "+593-098-3853-500"
         email_empresa = "supercompra@gruposuper.com"
+        logo_path = "src/Logo.png"  # Añadir la ruta a tu logotipo
 
         # --- Obtener datos del cliente ---
         tipo_id = Escoger_identificador.value
@@ -306,7 +309,7 @@ def generar_factura_pro(page: ft.Page):
             page.snack_bar.open = True
             page.update()
             return
-        
+
         nombre_cliente = nombre_cliente_texfield.value + " " + apellido_cliente_texfield.value
         direccion_cliente = direccion_cliente_texfield.value
 
@@ -327,12 +330,16 @@ def generar_factura_pro(page: ft.Page):
 
         # --- Estilos ---
         styles = getSampleStyleSheet()
-        styles.add(ParagraphStyle(name='FacturaTitle', fontSize=18, alignment=1))  # Título centrado
-        styles.add(ParagraphStyle(name='RightAlign', alignment=2))  # Alineación a la derecha
+        styles.add(ParagraphStyle(name='FacturaTitle', fontSize=20, alignment=1, spaceAfter=12, leading=24))  # Título centrado
+        styles.add(ParagraphStyle(name='RightAlign', alignment=2, leading=14))  # Alineación a la derecha
+
+        # --- Logotipo de la empresa ---
+        if os.path.exists(logo_path):
+            logo = Image(logo_path, width=70, height=50)
+            elements.append(logo)
 
         # --- Encabezado de la factura ---
         elements.append(Paragraph(f"{nombre_empresa}", styles['FacturaTitle']))
-        elements.append(Spacer(1, 12))
         elements.append(Paragraph(f"Dirección: {direccion_empresa}", styles['Normal']))
         elements.append(Paragraph(f"Teléfono: {telefono_empresa}", styles['Normal']))
         elements.append(Paragraph(f"Email: {email_empresa}", styles['Normal']))
@@ -341,7 +348,7 @@ def generar_factura_pro(page: ft.Page):
         # --- Información del cliente ---
         elements.append(Paragraph("Factura a:", styles['Heading2']))
         elements.append(Paragraph(f"Nombre: {nombre_cliente}", styles['Normal']))
-        elements.append(Paragraph(f"Identificación: {identificador_cliente}", styles['Normal'])) 
+        elements.append(Paragraph(f"Identificación: {identificador_cliente}", styles['Normal']))
         elements.append(Paragraph(f"Dirección: {direccion_cliente}", styles['Normal']))
         elements.append(Spacer(1, 24))
 
@@ -364,7 +371,7 @@ def generar_factura_pro(page: ft.Page):
                 f"{total:.2f}"  # Formatear total a 2 decimales
             ])
 
-        table = Table(data)
+        table = Table(data, colWidths=[30, 250, 60, 90, 90])
         table.setStyle(TableStyle([
             ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
             ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
@@ -372,21 +379,31 @@ def generar_factura_pro(page: ft.Page):
             ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
             ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
             ('BACKGROUND', (0, 1), (-1, -1), colors.beige),
-            ('GRID', (0, 0), (-1, -1), 1, colors.black)
+            ('GRID', (0, 0), (-1, -1), 1, colors.black),
+            ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.white, colors.lightgrey])
         ]))
         elements.append(table)
         elements.append(Spacer(1, 24))
 
-        # --- Totales ---
-        elements.append(Paragraph("Subtotal:", styles['RightAlign']))
-        elements.append(Paragraph(f"{subtotal_value.value}", styles['RightAlign']))
-        elements.append(Paragraph("IVA:", styles['RightAlign']))
-        elements.append(Paragraph(f"{iva_value.value}", styles['RightAlign']))
-        elements.append(Paragraph("Total:", styles['RightAlign']))
-        elements.append(Paragraph(f"{total_value.value}", styles['RightAlign']))
+        # --- Totales en tabla ---
+        total_data = [
+            ["", "Subtotal:", f"{subtotal_value.value}"],
+            ["", "IVA:", f"{iva_value.value}"],
+            ["", "Total:", f"{total_value.value}"]
+        ]
 
-        # ---  Mensaje final --- 
+        total_table = Table(total_data, colWidths=[400, 100, 90])
+        total_table.setStyle(TableStyle([
+            ('BACKGROUND', (1, 0), (2, 0), colors.beige),
+            ('TEXTCOLOR', (1, 0), (2, 0), colors.black),
+            ('ALIGN', (0, 0), (-1, -1), 'RIGHT'),
+            ('FONTNAME', (0, 0), (-1, -1), 'Helvetica-Bold'),
+            ('GRID', (0, 0), (-1, -1), 1, colors.black)
+        ]))
+        elements.append(total_table)
         elements.append(Spacer(1, 24))
+
+        # ---  Mensaje final ---
         elements.append(Paragraph("¡Gracias por su compra!", styles['Normal']))
 
         # --- Generar el PDF ---
