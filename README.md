@@ -22,8 +22,8 @@
 ## 🚀 Instalación
 ### 1. Clonar el Repositorio
 ```bash
-git clone https://github.com/tu-usuario/facturador-electronico.git
-cd facturador-electronico
+git clone https://github.com/Jhongdlp/flet_biller
+cd flet_biller
 ```
 
 ### 2. Instalar Flet
