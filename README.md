@@ -31,11 +31,12 @@
 </body>
 </html>
 
-  Instala flet para comenzar:
+Instala flet para comenzar:
+  
         ```bash
       pip install flet
       ```
-  Instala todas las dependencias del programa:
+Instala todas las dependencias del programa:
         
         ```bash
       pip install fernet
@@ -45,7 +46,7 @@
       
       ```
   
-      Y inicia el programa con:
+Y inicia el programa con:
 
       ```bash
       python main.py
