@@ -110,11 +110,17 @@ def RegistroPage(page: ft.Page):
         # Validar que los campos no estén vacíos
         if not usuario or not correo_electronico or not contraseña or not confirmar_contraseña:
             print("Los campos no pueden estar vacíos")
+            page.snack_bar = ft.SnackBar(ft.Text(f"Los campos no pueden estar vacíos."))
+            page.snack_bar.open = True
+            page.update()
             return
 
         # Validar que la contraseña y la confirmación de la contraseña coincidan
         if contraseña != confirmar_contraseña:
             print("La contraseña y la confirmación de la contraseña no coinciden")
+            page.snack_bar = ft.SnackBar(ft.Text(f"La contraseña y la confirmación de la contraseña no coinciden."))
+            page.snack_bar.open = True
+            page.update()
             return
         
         if contraseña == confirmar_contraseña:
@@ -138,10 +144,15 @@ def RegistroPage(page: ft.Page):
             Correo_electronico.value = ""
             Ingrese_contraseña.value = ""
             Confirmar_contraseña.value = ""
+            page.snack_bar = ft.SnackBar(ft.Text(f"Datos insertados correctamente."))
+            page.snack_bar.open = True
             page.update()
         except:
             bd.rollback()
             print("Error al insertar datos en la base de datos")
+            page.snack_bar = ft.SnackBar(ft.Text(f"Error al insertar datos en la base de datos."))
+            page.snack_bar.open = True
+            page.update()
         # Cerrar la conexión a la base de datos
         bd.close()
 
@@ -163,7 +174,9 @@ def RegistroPage(page: ft.Page):
         content=
             ft.Column(
                 spacing=10,controls=[
-                ft.Divider(color=ft.colors.TRANSPARENT),    
+                ft.Divider(color=ft.colors.TRANSPARENT,
+                    #height=55
+                ),    
                 ft.Container(
                     width=1366,
                     padding=0,
@@ -173,6 +186,7 @@ def RegistroPage(page: ft.Page):
                             width=650,
                             height=500,
                             elevation=10,
+                            variant=ft.CardVariant.OUTLINED,
                             #border=ft.border.all(),
                             content=ft.Row(
                                 spacing=0,controls=[
@@ -182,7 +196,7 @@ def RegistroPage(page: ft.Page):
                                     height=600,
                                     #border=ft.border.all(),
                                     content=ft.Image(
-                                        src=f"src/Empresa_fondo.jpg",
+                                        src=f"https://i.ibb.co/93KG58q/fondo-register-empresa.jpg",
                                         fit=ft.ImageFit.FILL,
                                         repeat=ft.ImageRepeat.NO_REPEAT,
                                     )

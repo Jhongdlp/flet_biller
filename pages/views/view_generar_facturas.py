@@ -682,7 +682,6 @@ def generar_factura_pro(page: ft.Page):
         page.update()
 
     def generar_factura_boton(e):
-        """Valida y genera la factura."""
         try:
             dinero_ingresado = float(dinero_input.value)
             cambio = dinero_ingresado - float(total_value.value)
@@ -707,7 +706,6 @@ def generar_factura_pro(page: ft.Page):
         page.update()
     page.update()
     def limpiar_error(e):
-        """Limpia el error del dinero_input cuando el usuario empieza a escribir."""
         if dinero_input.error_text:
             dinero_input.error_text = ""
             page.update()
@@ -936,7 +934,7 @@ def generar_factura_pro(page: ft.Page):
     telefono_cliente_texfield.on_change = on_change
     mail_cliente_texfield.on_change = on_change
     page.update()
-    delete_all_button = ft.ElevatedButton(text="Eliminar todas las filas", on_click=delete_all_rows)
+    delete_all_button = ft.ElevatedButton(text="Limpiar todas las filas", on_click=delete_all_rows,color=ft.colors.WHITE,bgcolor=ft.colors.RED)
 
     Boton_consumirdor_final=ft.ElevatedButton("Consumidor final",width=158,height=35,bgcolor=ft.colors.GREEN_500,color="WHITE",
         on_click=consumidor_final
@@ -1010,7 +1008,7 @@ def generar_factura_pro(page: ft.Page):
                                 content=ft.Column(spacing=0,controls=[
                                     ft.Row(spacing=0,controls=[
                                         ft.Text("Datos de cliente",size=25),
-                                        ft.ElevatedButton(text="Limpiar",on_click=limpiar_datos_clientes),
+                                        ft.ElevatedButton(text="Limpiar",on_click=limpiar_datos_clientes,bgcolor=ft.colors.RED,color=ft.colors.WHITE),
                                     ],alignment=ft.MainAxisAlignment.SPACE_BETWEEN),
                                     ft.Divider(),
                                         ft.Row(spacing=5,controls=[

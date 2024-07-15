@@ -95,9 +95,14 @@ def Login_page(page: ft.Page):
                 page.go("/home")
             else:
                 print("La contraseña es incorrecta. No se permitió el acceso.")
+                page.snack_bar = ft.SnackBar(ft.Text(f"La contraseña es incorrecta. No se permitió el acceso."))
+                page.snack_bar.open = True
+                page.update()
         else:
             print("No se encontró el usuario en la base de datos.")
-        
+            page.snack_bar = ft.SnackBar(ft.Text(f"No se encontró el usuario en la base de datos."))
+            page.snack_bar.open = True
+            page.update()
 
     def minimizar_pagima(e):
         page.window_minimized=True
@@ -151,25 +156,31 @@ def Login_page(page: ft.Page):
         )
     
     Login=ft.Container(
-        #width=1700,
-        #height=700,
+        width=1380,
+        height=700,
+        alignment=ft.alignment.center,
         #border=ft.border.all(),
         padding=0,
         content=
             ft.Column(
                 spacing=10,controls=[
-                ft.Divider(color=ft.colors.TRANSPARENT),    
+                ft.Divider(color=ft.colors.TRANSPARENT,
+                    #height=55
+                ),    
                 ft.Container(
                     width=1366,
                     padding=0, 
+                    alignment=ft.alignment.center,
                     #border=ft.border.all(),
                     content=ft.Row(spacing=0,controls=[
                         ft.Card(
                             width=650,
                             height=500,
                             elevation=10,
+                            variant=ft.CardVariant.OUTLINED,
                             #border=ft.border.all(),
-                            content=ft.Row(
+                            content=
+                            ft.Row(
                                 spacing=0,controls=[
                                 ft.Card(
                                     #padding=0,
@@ -178,7 +189,7 @@ def Login_page(page: ft.Page):
                                     #border=ft.border.all(),
                                     content=ft.Image(
                                         #opacity=0.5,
-                                        src=f"src/Empresa_fondo.jpg",
+                                        src=f"https://i.ibb.co/sPp9CSZ/Empresa-fondo.jpg",
                                         fit=ft.ImageFit.FILL,
                                         repeat=ft.ImageRepeat.NO_REPEAT,
                                     )
@@ -197,7 +208,7 @@ def Login_page(page: ft.Page):
                                                         ft.Container(width=100,height=100,
                                                             #border=ft.border.all(),
                                                             content=ft.Image(
-                                                                src=f"src/Logo.png",
+                                                                src=f"https://i.ibb.co/ZxS6FDs/Logo.png",
                                                                 fit=ft.ImageFit.FILL,
                                                                 repeat=ft.ImageRepeat.NO_REPEAT, 
                                                             )            
