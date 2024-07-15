@@ -57,4 +57,4 @@ Las contribuciones son bienvenidas. Por favor, revisa las [directrices de contri
 Este proyecto está bajo la Licencia MIT. Mira el archivo [LICENSE](LICENSE) para más detalles.
 
 ## 📧 Contacto
-Para preguntas y sugerencias, por favor contacta a [tu-email@ejemplo.com](mailto:tu-email@ejemplo.com).
+Para preguntas y sugerencias, por favor contacta a [jhongdlp204@gmail.com](mailto:jhongdlp204@gmail.com).
