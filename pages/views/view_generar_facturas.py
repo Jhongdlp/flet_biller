@@ -881,10 +881,7 @@ def generar_factura_pro(page: ft.Page):
         page.update()
 
         # Si no hay errores, continuar con la generación de la factura
-        if not error:
-            # ... (Aquí iría la lógica para generar la factura XML y PDF,
-            #  que ya no se incluye en esta función) 
-            print("¡Factura generada con éxito!")
+        if not error: 
             abrir_alert_metodo_pago(e)
             page.update()
 

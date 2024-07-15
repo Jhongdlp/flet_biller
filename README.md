@@ -28,6 +28,17 @@
       <li>MySQL Server</li>
     </ul>
   </div>
+  <div<
+        ```bash
+      pip install flet
+      ```
+
+      and run the program:
+
+      ```bash
+      python counter.py
+      ```
+  </div>
 
 </body>
 </html>

@@ -433,17 +433,6 @@ def view_facturas_all(page: ft.Page):
 
     update_page_facturas(page, 1)  # Mostrar la primera página inicialmente
 
-    return ft.Row(
-        spacing=0,
-        controls=[
-            ft.Container(
-                expand=True,
-                content=ft.Column(
-                    spacing=0,
-                    controls=[
-                        view_facturas
-                    ]
-                )
-            )
-        ]
-    )
+    page.add(view_facturas)
+
+ft.app(target=view_facturas_all)

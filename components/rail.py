@@ -42,6 +42,6 @@ def create_navigation_rail(page: ft.Page, selected_index: int):
                 label_content=ft.Text("Estadisticas"),padding=13
             ),
         ],
-        on_change=lambda e: page.go(["/home", "/Facturas", "/generar_facturas","/Clientes","/Inventario"][e.control.selected_index])
+        on_change=lambda e: page.go(["/home", "/Facturas", "/generar_facturas","/Clientes","/Inventario","/Estadistica"][e.control.selected_index])
     )
     return rail
