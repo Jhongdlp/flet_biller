@@ -1,19 +1,24 @@
 import flet as ft
 import re
 
+from logic.validaciones import validar_cedula_ecuador,validar_pasaporte_ecuador,validar_ruc_ecuador
 from components.rail import create_navigation_rail
 from sql.base_implemtnacion import get_product_data
 from datetime import datetime
 from xml.dom import minidom
+
 from reportlab.lib.pagesizes import letter
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.units import inch
 from reportlab.lib import colors
+
 import uuid
 import os
 import pymysql
 import xml.etree.ElementTree as ET
+
+
 
 def generar_factura_pro(page: ft.Page):
     #!==================================================================================
@@ -59,7 +64,7 @@ def generar_factura_pro(page: ft.Page):
     #!=================TEXFIELDS==================
     # Definir la función que se ejecutará al cambiar el texto
 
-    cedula_cliente_texfield=ft.TextField(label=("Identificador"),width=230,height=45,
+    identificador_cliente_texfield=ft.TextField(label=("Identificador"),width=230,height=45,
         input_filter=ft.InputFilter(allow=True, regex_string=r"[0-9]", replacement_string=""),
         error_text=None,  # No mostrar error inicialmente
     )
@@ -96,7 +101,17 @@ def generar_factura_pro(page: ft.Page):
         pattern = r'^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$'
         return re.match(pattern, email) is not None
 
-
+    Escoger_identificador=ft.Dropdown(
+        width=100,
+        height=35,
+        content_padding=1,
+        options=[
+            ft.dropdown.Option("Cedula"),
+            ft.dropdown.Option("RUC"),
+            ft.dropdown.Option("Pasaporte"),
+        ],  
+        value="Cedula"   
+    )
 
     subtotal_value = ft.Text(value="0.00")
     iva_value = ft.Text(value="0.00")
@@ -264,10 +279,36 @@ def generar_factura_pro(page: ft.Page):
         email_empresa = "supercompra@gruposuper.com"
 
         # --- Obtener datos del cliente ---
+        tipo_id = Escoger_identificador.value
+        if tipo_id == "Cedula":
+            identificador_cliente = f"C.{identificador_cliente_texfield.value}"
+            if not validar_cedula_ecuador(identificador_cliente_texfield.value):
+                page.snack_bar = ft.SnackBar(ft.Text("Cédula inválida"))
+                page.snack_bar.open = True
+                page.update()
+                return
+        elif tipo_id == "RUC":
+            identificador_cliente = f"R.{identificador_cliente_texfield.value}"
+            if not validar_ruc_ecuador(identificador_cliente_texfield.value):
+                page.snack_bar = ft.SnackBar(ft.Text("RUC inválido"))
+                page.snack_bar.open = True
+                page.update()
+                return
+        elif tipo_id == "Pasaporte":
+            identificador_cliente = f"P.{identificador_cliente_texfield.value}"
+            if not validar_pasaporte_ecuador(identificador_cliente_texfield.value):
+                page.snack_bar = ft.SnackBar(ft.Text("Pasaporte inválido"))
+                page.snack_bar.open = True
+                page.update()
+                return
+        else:
+            page.snack_bar = ft.SnackBar(ft.Text("Tipo de ID inválido"))
+            page.snack_bar.open = True
+            page.update()
+            return
+        
         nombre_cliente = nombre_cliente_texfield.value + " " + apellido_cliente_texfield.value
-        cedula_cliente = cedula_cliente_texfield.value
         direccion_cliente = direccion_cliente_texfield.value
-        # ... (Obtener otros datos del cliente)
 
         # --- Generar código único para la factura ---
         codigo_factura = str(uuid.uuid4())
@@ -300,7 +341,7 @@ def generar_factura_pro(page: ft.Page):
         # --- Información del cliente ---
         elements.append(Paragraph("Factura a:", styles['Heading2']))
         elements.append(Paragraph(f"Nombre: {nombre_cliente}", styles['Normal']))
-        elements.append(Paragraph(f"Cédula: {cedula_cliente}", styles['Normal']))
+        elements.append(Paragraph(f"Identificación: {identificador_cliente}", styles['Normal'])) 
         elements.append(Paragraph(f"Dirección: {direccion_cliente}", styles['Normal']))
         elements.append(Spacer(1, 24))
 
@@ -430,12 +471,49 @@ def generar_factura_pro(page: ft.Page):
         """Guarda los datos de la factura en la base de datos."""
 
         # 1. Obtener datos de la factura (incluyendo teléfono y email)
-        cedula_cliente = cedula_cliente_texfield.value
         nombre_cliente = nombre_cliente_texfield.value
         apellido_cliente = apellido_cliente_texfield.value
         telefono_cliente = telefono_cliente_texfield.value
         email_cliente = mail_cliente_texfield.value
         fecha_factura = datetime.now().strftime("%Y-%m-%d")
+
+        # --- Obtener el identificador con el formato correcto ---
+        tipo_id = Escoger_identificador.value
+        if tipo_id == "Cedula":
+            identificador_cliente = f"C.{identificador_cliente_texfield.value}"
+            if not validar_cedula_ecuador(identificador_cliente_texfield.value):
+                # Manejar error de cédula inválida
+                print("Cédula inválida")
+                page.snack_bar = ft.SnackBar(ft.Text("Cédula inválida"))
+                page.snack_bar.open = True
+                page.update()
+                return  
+        elif tipo_id == "RUC":
+            identificador_cliente = f"R.{identificador_cliente_texfield.value}"
+            if not validar_ruc_ecuador(identificador_cliente_texfield.value):
+                # Manejar error de RUC inválido
+                print("RUC inválido")
+                page.snack_bar = ft.SnackBar(ft.Text("RUC inválido"))
+                page.snack_bar.open = True
+                page.update()
+                return
+        elif tipo_id == "Pasaporte":
+            identificador_cliente = f"P.{identificador_cliente_texfield.value}"
+            if not validar_pasaporte_ecuador(identificador_cliente_texfield.value):
+                # Manejar error de pasaporte inválido
+                print("Pasaporte inválido")
+                page.snack_bar = ft.SnackBar(ft.Text("Pasaporte inválido"))
+                page.snack_bar.open = True
+                page.update()
+                return 
+        else:
+            # Manejar error de tipo de ID no válido
+            print("Tipo de ID inválido")
+            page.snack_bar = ft.SnackBar(ft.Text("Tipo de ID inválido"))
+            page.snack_bar.open = True
+            page.update()
+            return
+
 
         # 2. Construir la cadena de productos
         productos_str = ",".join(
@@ -460,18 +538,18 @@ def generar_factura_pro(page: ft.Page):
             # 5. Crear un cursor
             cursor = conexion.cursor()
 
-            # 6. Consulta SQL para insertar la factura (incluyendo teléfono y email)
+            # 6. Consulta SQL para insertar la factura 
             sql = """
-                INSERT INTO facturas (cedula, nombre, apellido, telefono, 
+                INSERT INTO facturas (identificador, nombre, apellido, telefono, 
                                     email, fecha, productos, totales) 
                 VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
             """
             valores = (
-                cedula_cliente,
+                identificador_cliente, # Usamos el identificador validado
                 nombre_cliente,
                 apellido_cliente,
-                telefono_cliente,  # Nuevo campo
-                email_cliente,     # Nuevo campo
+                telefono_cliente,  
+                email_cliente,     
                 fecha_factura,
                 productos_str,
                 totales_str,
@@ -482,15 +560,6 @@ def generar_factura_pro(page: ft.Page):
 
             # 8. Hacer commit para guardar los cambios
             conexion.commit()
-
-            page.snack_bar = ft.SnackBar(
-                ft.Text("Factura guardada correctamente.", size=20),
-                bgcolor=ft.colors.GREEN_400, 
-                duration=3000,
-            )
-            page.snack_bar.open = True
-            page.update()
-
         except Exception as e:
             print(f"Error al guardar la factura: {e}")
 
@@ -510,13 +579,13 @@ def generar_factura_pro(page: ft.Page):
     
     def eliminar_todo(e):
         delete_all_rows(e)
-        cedula_cliente_texfield.value=""
+        identificador_cliente_texfield.value=""
         nombre_cliente_texfield.value=""
         apellido_cliente_texfield.value=""
         direccion_cliente_texfield.value=""
         telefono_cliente_texfield.value=""
         mail_cliente_texfield.value=""
-        cedula_cliente_texfield.read_only=False
+        identificador_cliente_texfield.read_only=False
         nombre_cliente_texfield.read_only=False
         apellido_cliente_texfield.read_only=False
         direccion_cliente_texfield.read_only=False
@@ -526,13 +595,13 @@ def generar_factura_pro(page: ft.Page):
         page.update()
     
     def limpiar_datos_clientes(e):
-        cedula_cliente_texfield.value=""
+        identificador_cliente_texfield.value=""
         nombre_cliente_texfield.value=""
         apellido_cliente_texfield.value=""
         direccion_cliente_texfield.value=""
         telefono_cliente_texfield.value=""
         mail_cliente_texfield.value=""
-        cedula_cliente_texfield.read_only=False
+        identificador_cliente_texfield.read_only=False
         nombre_cliente_texfield.read_only=False
         apellido_cliente_texfield.read_only=False
         direccion_cliente_texfield.read_only=False
@@ -542,13 +611,13 @@ def generar_factura_pro(page: ft.Page):
         page.update()
 
     def consumidor_final(e):
-        cedula_cliente_texfield.value="0000000000"
+        identificador_cliente_texfield.value="0000000000"
         nombre_cliente_texfield.value="**************"
         apellido_cliente_texfield.value="**************"
         direccion_cliente_texfield.value="*****************"
         telefono_cliente_texfield.value="0000000000"
         mail_cliente_texfield.value="consumidorfinal@consumidorfinal.com"
-        cedula_cliente_texfield.read_only=True
+        identificador_cliente_texfield.read_only=True
         nombre_cliente_texfield.read_only=True
         apellido_cliente_texfield.read_only=True
         direccion_cliente_texfield.read_only=True
@@ -557,113 +626,121 @@ def generar_factura_pro(page: ft.Page):
         on_change(e)
         page.update()
 
-    def llamar_a_todas_las_funciones(e):
-        """Genera la factura XML y el PDF solo si hay productos."""
 
-        if data_table.rows:  # Verificar si hay filas en la tabla
-            generar_factura_xml(e)
-            generar_factura_pdf(e)
-            guardar_factura_db(e)
-        else:
-            # Mostrar un mensaje de error o alerta
-            page.snack_bar = ft.SnackBar(
-                ft.Text("No hay productos en la factura.", size=20),
-                bgcolor=ft.colors.RED_400,
-                duration=3000  # Mostrar por 3 segundos
+    def llamar_a_todas_las_funciones(e):
+        generar_factura_xml(e)
+        generar_factura_pdf(e)
+        guardar_factura_db(e)
+        page.update()
+
+
+    # Crear los controles del AlertDialog
+    dinero_input = ft.TextField(label="Dinero Ingresado", on_change=lambda e: (calcular_cambio(e), limpiar_error(e)))
+    cambio_text = ft.Text("Cambio: 0.00",weight=ft.FontWeight.W_900,size=20)
+    total_productos_text = ft.Text(f"Total de productos: {len(data_table.rows)}")
+    def cerrar_alert_metodo_de_pago(e):
+        dlg.open = False
+        page.update()
+        page.snack_bar = ft.SnackBar(
+                ft.Text("Factura guardada correctamente.", size=20),
+                bgcolor=ft.colors.GREEN_400, 
+                duration=3000,
             )
-            page.snack_bar.open = True
+        page.snack_bar.open = True
+        dinero_input.value=""
+
+        page.update()
+
+
+    def calcular_cambio(e):
+        """Calcula el cambio cuando cambia el valor de 'dinero_input'."""
+        try:
+            dinero_ingresado = float(dinero_input.value)
+            cambio = dinero_ingresado - float(total_value.value)
+            cambio_text.value = f"Cambio: {cambio:.2f}"
             page.update()
+        except ValueError:
+            cambio_text.value = "Ingresa un número válido"
+            page.update()
+        page.update()
+
+    def generar_factura_boton(e):
+        """Valida y genera la factura."""
+        try:
+            dinero_ingresado = float(dinero_input.value)
+            cambio = dinero_ingresado - float(total_value.value)
+            if dinero_input.value == "":
+                dinero_input.error_text = "Este campo no puede estar vacío"
+                page.update()
+                return
+            if cambio < 0:
+                cambio_text.value = "El cambio no puede ser negativo"
+                page.update()
+                return
+            # Aquí agregas la lógica para generar la factura
+            cambio_text.value = f"Factura generada con cambio: {cambio:.2f}"
+            llamar_a_todas_las_funciones(e)
+            page.update()
+            eliminar_todo(e)
+            page.update()
+            cerrar_alert_metodo_de_pago(e)
+            page.update()
+        except ValueError:
+            dinero_input.error_text = "Ingresa un número válido"
+        page.update()
+    page.update()
+    def limpiar_error(e):
+        """Limpia el error del dinero_input cuando el usuario empieza a escribir."""
+        if dinero_input.error_text:
+            dinero_input.error_text = ""
+            page.update()
+    page.update()
+
+        
+        # Crear el AlertDialog
+    dlg = ft.AlertDialog(
+        modal=True,
+        title=ft.Text("Efectua el pago: ",weight=ft.FontWeight.W_900),
+        content=ft.Container(
+            height=300,
+            content=ft.Column(
+            [
+                ft.Divider(),
+                ft.Column(spacing=0, controls=[
+                    ft.Row([ft.Text("Subtotal: "), subtotal_value]),
+                    ft.Row([ft.Text("Iva: "), iva_value]),
+                    ft.Row([ft.Text("Total: ",weight=ft.FontWeight.W_900), total_value]),
+                    ft.Divider(color=ft.colors.TRANSPARENT),
+                ]),
+                dinero_input,
+                ft.Divider(),
+                cambio_text,
+                total_productos_text,
+            ])
+        ),
+        actions=[
+            ft.ElevatedButton(
+                text="Generar Factura",
+                on_click=generar_factura_boton
+            ),
+            ft.ElevatedButton(
+                text="Cerrar",
+                on_click=cerrar_alert_metodo_de_pago
+            ),
+        ],
+    )
+    page.update()
 
     def abrir_dialogo_pago(e):
         """Abre el AlertDialog para gestionar el pago."""
-
-        def calcular_cambio(e):
-            """Calcula el cambio cuando cambia el valor de 'dinero_input'."""
-            try:
-                dinero_ingresado = float(dinero_input.value)
-                cambio = dinero_ingresado - float(total_value.value)
-                cambio_text.value = f"Cambio: {cambio:.2f}"
-            except ValueError:
-                cambio_text.value = "Ingresa un número válido"
-            page.update()
-
-        def generar_factura_boton(e):
-            """Valida y genera la factura."""
-            try:
-                dinero_ingresado = float(dinero_input.value)
-                cambio = dinero_ingresado - float(total_value.value)
-                if dinero_input.value == "":
-                    dinero_input.error_text = "Este campo no puede estar vacío"
-                    page.update()
-                    return
-                if cambio < 0:
-                    cambio_text.value = "El cambio no puede ser negativo"
-                    page.update()
-                    return
-                # Aquí agregas la lógica para generar la factura
-                cambio_text.value = f"Factura generada con cambio: {cambio:.2f}"
-                llamar_a_todas_las_funciones(e)
-                eliminar_todo(e)
-            except ValueError:
-                dinero_input.error_text = "Ingresa un número válido"
-            page.update()
-
-        def limpiar_error(e):
-            """Limpia el error del dinero_input cuando el usuario empieza a escribir."""
-            if dinero_input.error_text:
-                dinero_input.error_text = ""
-                page.update()
-
-        # Crear los controles del AlertDialog
-        dinero_input = ft.TextField(label="Dinero Ingresado", on_change=lambda e: (calcular_cambio(e), limpiar_error(e)))
-        cambio_text = ft.Text("Cambio: 0.00",weight=ft.FontWeight.W_900,size=20)
-        total_productos_text = ft.Text(f"Total de productos: {len(data_table.rows)}")
-
-        # Crear el AlertDialog
-        dlg = ft.AlertDialog(
-            modal=True,
-            title=ft.Text("Efectua el pago: ",weight=ft.FontWeight.W_900),
-            content=ft.Container(
-                height=300,
-                content=ft.Column(
-                [
-                    ft.Divider(),
-                    ft.Column(spacing=0, controls=[
-                        ft.Row([ft.Text("Subtotal: "), subtotal_value]),
-                        ft.Row([ft.Text("Iva: "), iva_value]),
-                        ft.Row([ft.Text("Total: ",weight=ft.FontWeight.W_900), total_value]),
-                        ft.Divider(color=ft.colors.TRANSPARENT),
-                    ]),
-                    dinero_input,
-                    ft.Divider(),
-                    cambio_text,
-                    total_productos_text,
-                ])
-            ),
-            actions=[
-                ft.ElevatedButton(
-                    text="Generar Factura",
-                    on_click=generar_factura_boton
-                ),
-                ft.ElevatedButton(
-                    text="Cerrar",
-                    on_click=lambda e: (
-                        setattr(dlg, "open", False),  # Asignar False a dlg.open
-                        page.update()
-                    )
-                ),
-            ],
-        )
-
-        # Abrir el AlertDialog
+        alert_metodo_pago.open = False
+        page.update()
         page.dialog = dlg
         dlg.open = True
         page.update()
 
     
-    def cerrar_alert_metodo_de_pago(e):
-        alert_metodo_pago.open = False
-        page.update()
+
 
     alert_metodo_pago = ft.AlertDialog(
         modal=False,
@@ -720,13 +797,13 @@ def generar_factura_pro(page: ft.Page):
         """
 
         # Validar campos de cliente
-        error = False
-        if not cedula_cliente_texfield.value:
-            cedula_cliente_texfield.error_text = "Este campo es obligatorio"
-            cedula_cliente_texfield.error_style = ft.TextStyle(color=ft.colors.RED)
+        error = False  # Variable para controlar si hay algún error en la validación
+        if not identificador_cliente_texfield.value:
+            identificador_cliente_texfield.error_text = "Este campo es obligatorio"
+            identificador_cliente_texfield.error_style = ft.TextStyle(color=ft.colors.RED)
             error = True
         else:
-            cedula_cliente_texfield.error_text = None  # Limpiar error si se corrige
+            identificador_cliente_texfield.error_text = None  # Limpiar error si se corrige
 
         if not nombre_cliente_texfield.value:
             nombre_cliente_texfield.error_text = "Este campo es obligatorio"
@@ -767,6 +844,29 @@ def generar_factura_pro(page: ft.Page):
         else:
             mail_cliente_texfield.error_text = None
 
+    # --- Validar el identificador del cliente ---
+        tipo_id = Escoger_identificador.value
+        if tipo_id == "Cedula":
+            if not validar_cedula_ecuador(identificador_cliente_texfield.value):
+                identificador_cliente_texfield.error_text = "Cédula inválida"
+                page.update()
+                return
+        elif tipo_id == "RUC":
+            if not validar_ruc_ecuador(identificador_cliente_texfield.value):
+                identificador_cliente_texfield.error_text = "RUC inválido"
+                page.update()
+                return
+        elif tipo_id == "Pasaporte":
+            if not validar_pasaporte_ecuador(identificador_cliente_texfield.value):
+                identificador_cliente_texfield.error_text = "Pasaporte inválido"
+                page.update()
+                return
+        else:
+            page.snack_bar = ft.SnackBar(ft.Text("Tipo de ID inválido"))
+            page.snack_bar.open = True
+            page.update()
+            return
+
         # Validar si hay productos en la tabla
         if not data_table.rows:
             page.snack_bar = ft.SnackBar(
@@ -782,14 +882,16 @@ def generar_factura_pro(page: ft.Page):
 
         # Si no hay errores, continuar con la generación de la factura
         if not error:
-            # ... (Lógica para generar factura XML y PDF usando los datos de los campos y la tabla)
-            print("¡Factura generada con éxito!") 
+            # ... (Aquí iría la lógica para generar la factura XML y PDF,
+            #  que ya no se incluye en esta función) 
+            print("¡Factura generada con éxito!")
             abrir_alert_metodo_pago(e)
+            page.update()
 
     def on_change(e):
-        if cedula_cliente_texfield.error_text:
-            cedula_cliente_texfield.error_text = None
-            cedula_cliente_texfield.update()
+        if identificador_cliente_texfield.error_text:
+            identificador_cliente_texfield.error_text = None
+            identificador_cliente_texfield.update()
 
         if nombre_cliente_texfield.error_text:
             nombre_cliente_texfield.error_text = None
@@ -810,15 +912,16 @@ def generar_factura_pro(page: ft.Page):
         if mail_cliente_texfield.error_text:
             mail_cliente_texfield.error_text = None
             mail_cliente_texfield.update()
+            
 
     # Asociar la función on_change al evento on_change de los TextField
-    cedula_cliente_texfield.on_change = on_change
+    identificador_cliente_texfield.on_change = on_change
     nombre_cliente_texfield.on_change = on_change
     apellido_cliente_texfield.on_change = on_change
     direccion_cliente_texfield.on_change = on_change
     telefono_cliente_texfield.on_change = on_change
     mail_cliente_texfield.on_change = on_change
-
+    page.update()
     delete_all_button = ft.ElevatedButton(text="Eliminar todas las filas", on_click=delete_all_rows)
 
     Boton_consumirdor_final=ft.ElevatedButton("Consumidor final",width=158,height=35,bgcolor=ft.colors.GREEN_500,color="WHITE",
@@ -896,10 +999,10 @@ def generar_factura_pro(page: ft.Page):
                                         ft.ElevatedButton(text="Limpiar",on_click=limpiar_datos_clientes),
                                     ],alignment=ft.MainAxisAlignment.SPACE_BETWEEN),
                                     ft.Divider(),
-                                        ft.Row(spacing=0,controls=[
-                                            cedula_cliente_texfield,
-                                            ft.IconButton(icon=ft.icons.DOCUMENT_SCANNER),
-                                            ft.IconButton(icon=ft.icons.DOCK)
+                                        ft.Row(spacing=5,controls=[
+                                            Escoger_identificador,
+                                            identificador_cliente_texfield,
+
                                         ]),
                                         ft.Divider(),
                                         ft.Row(spacing=0,controls=[

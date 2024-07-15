@@ -55,7 +55,7 @@ INSERT INTO `clientes` (`id_cliente`, `identificador`, `nombre_apellido`, `direc
 
 CREATE TABLE `facturas` (
   `numero_factura` int(11) NOT NULL,
-  `cedula` varchar(20) NOT NULL,
+  `identificador` varchar(15) NOT NULL,
   `nombre` varchar(50) NOT NULL,
   `apellido` varchar(50) NOT NULL,
   `telefono` varchar(20) NOT NULL,
@@ -69,12 +69,6 @@ CREATE TABLE `facturas` (
 -- Volcado de datos para la tabla `facturas`
 --
 
-INSERT INTO `facturas` (`numero_factura`, `cedula`, `nombre`, `apellido`, `telefono`, `email`, `fecha`, `productos`, `totales`) VALUES
-(1, '1750395012', 'Jhon', 'Andrade', '0978564232', 'jhongamercd80@gmail.com', '2024-07-09', '1.1,2.1,4.1,5.1,7.1,8.1', '3477.48,521.62,3999.10'),
-(2, '1750395012', 'Jhon', 'Andrade', '0978564232', 'jhongamercd80@gmail.com', '2024-07-09', '1.1,2.1,4.1,5.1,7.1,8.1', '3477.48,521.62,3999.10'),
-(3, '1750395012', 'andra', 'Andrade', '1987454', 'jahsdoasdn', '2024-07-10', '1.1,2.1,3.1,4.1,5.1', '3848.48,577.27,4425.75'),
-(4, '12312312', 'adsad', 'adasd', '12312', 'jhon@gmail.com', '2024-07-10', '1.1,2.1,3.1,4.1,5.1,7.1,8.1,9.1,12.1,13.1,14.1', '5355.71,642.69,5998.40'),
-(5, '12312', 'sdsad', 'asdasd', '123123', 'Jhon@gmail.com', '2024-07-10', '1.1,2.1,3.1,4.1,5.1', '3848.48,461.82,4310.30');
 
 -- --------------------------------------------------------
 
@@ -286,7 +280,7 @@ ALTER TABLE `clientes`
 -- AUTO_INCREMENT de la tabla `facturas`
 --
 ALTER TABLE `facturas`
-  MODIFY `numero_factura` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `numero_factura` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=1;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
