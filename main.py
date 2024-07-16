@@ -2,12 +2,14 @@ import flet as ft
 from pages.home import HomePage
 from pages.login_page import Login_page
 from pages.Registro import RegistroPage
+from pages.configurar_usuario import view_configurar_usuario
 
 from pages.views.view_inventario import view_inventario_all
 from pages.views.view_clientes import view_clientes_all
 from pages.views.view_generar_facturas import generar_factura_pro
 from pages.views.view_facturas import view_facturas_all
 from pages.views.view_estadistica import view_estadistica_all
+
 # Función principal
 def main(page: ft.Page):
     # Contenedor para las páginas
@@ -25,6 +27,9 @@ def main(page: ft.Page):
 
         elif page_name == "home":
             page_container.content = HomePage(page)
+
+        elif page_name == "config_usuario":
+            page_container.content = view_configurar_usuario(page)
             
         elif page_name == "Facturas":
             page_container.content = view_facturas_all(page)

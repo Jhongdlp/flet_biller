@@ -1,5 +1,10 @@
 import flet as ft
 
+id=ft.Text("")
+apellidos=ft.Text("")
+nombres=ft.Text("")
+correo=ft.Text("")
+ciudad=ft.Text("")
 
 def HomePage(page: ft.Page):
     page.theme_mode=ft.ThemeMode.LIGHT
@@ -21,6 +26,14 @@ def HomePage(page: ft.Page):
     def go_to_page_Five(e):
         # Elimina la página actual y agrega la interfaz de la página 2
         page.go("/Inventario")
+        page.update()
+    def go_to_page_six(e):
+        # Elimina la página actual y agrega la interfaz de la página 2
+        page.go("/Inventario")
+        page.update()
+    def go_to_page_usuario(e):
+        # Elimina la página actual y agrega la interfaz de la página 2
+        page.go("/config_usuario")
         page.update()
     def toggle_theme(e):
         if page.theme_mode == ft.ThemeMode.LIGHT:
@@ -280,9 +293,11 @@ def HomePage(page: ft.Page):
         border_radius=10,
         ink=True,
         border=ft.border.all(3,color='#e4e5eb'),
-        on_click=lambda e: print("Clickable transparent with Ink clicked!"),
+        on_click=go_to_page_usuario,
     )
-    
+
+
+
     page_one_ui=ft.Container(
         padding=0,
         content=ft.Column(spacing=0,controls=[
@@ -366,11 +381,17 @@ def HomePage(page: ft.Page):
                                                         ft.Container(
                                                             #border=ft.border.all(),
                                                             content=ft.Column([
-                                                                ft.Text("ID:1750395012",size=15),
-                                                                ft.Text("Apellidos: Andrade Guadalupe"),
-                                                                ft.Text("Nombres: Jhon Paul"),
-                                                                ft.Text("Correo: ejemplo@gmail.com"),
-                                                                ft.Text("Ciudad: Quito"),
+                                                                ft.Row([ft.Text("ID:",size=15),id]),
+                                                                ft.Row([ft.Text("Apellidos:"),apellidos]),
+                                                                ft.Row([ft.Text("Nombres:"),nombres]),
+                                                                ft.Row([ft.Text("Correo:"),correo]),
+                                                                ft.Row([ft.Text("Ciudad:"),ciudad])
+                                                                
+                                                                
+                                                                
+                                                                
+                                                                
+                                                                
                                                             ])             
                                                         )
                                                     ],alignment=ft.MainAxisAlignment.CENTER)
