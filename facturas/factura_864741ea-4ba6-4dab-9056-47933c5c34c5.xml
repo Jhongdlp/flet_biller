@@ -1,0 +1,96 @@
+<?xml version="1.0" ?>
+<Factura xmlns="urn:oasis:names:specification:ubl:schema:xsd:Invoice-2" xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2" xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2">
+  <cbc:ID>864741ea-4ba6-4dab-9056-47933c5c34c5</cbc:ID>
+  <cbc:IssueDate>2024-07-16T11:33:44</cbc:IssueDate>
+  <cbc:AccountingSupplierParty>
+    <cac:Party>
+      <cac:PartyName>Jhon Guadalupe</cac:PartyName>
+    </cac:Party>
+  </cbc:AccountingSupplierParty>
+  <cbc:AccountingCustomerParty>
+    <cac:Party>
+      <cac:PartyName>Jhon Guadalupe</cac:PartyName>
+    </cac:Party>
+  </cbc:AccountingCustomerParty>
+  <cac:InvoiceLine ID="1">
+    <cbc:InvoicedQuantity>1</cbc:InvoicedQuantity>
+    <cbc:Description>Smartphone avanzado</cbc:Description>
+    <cac:Price>899.99</cac:Price>
+  </cac:InvoiceLine>
+  <cac:InvoiceLine ID="2">
+    <cbc:InvoicedQuantity>1</cbc:InvoicedQuantity>
+    <cbc:Description>Tablet profesional</cbc:Description>
+    <cac:Price>799.5</cac:Price>
+  </cac:InvoiceLine>
+  <cac:InvoiceLine ID="3">
+    <cbc:InvoicedQuantity>1</cbc:InvoicedQuantity>
+    <cbc:Description>Auriculares inalámbricos</cbc:Description>
+    <cac:Price>249.99</cac:Price>
+  </cac:InvoiceLine>
+  <cac:InvoiceLine ID="4">
+    <cbc:InvoicedQuantity>9</cbc:InvoicedQuantity>
+    <cbc:Description>Monitor curvo 27&quot;</cbc:Description>
+    <cac:Price>399.99</cac:Price>
+  </cac:InvoiceLine>
+  <cac:InvoiceLine ID="5">
+    <cbc:InvoicedQuantity>1</cbc:InvoicedQuantity>
+    <cbc:Description>Teclado mecánico RGB</cbc:Description>
+    <cac:Price>129.0</cac:Price>
+  </cac:InvoiceLine>
+  <cac:InvoiceLine ID="6">
+    <cbc:InvoicedQuantity>1</cbc:InvoicedQuantity>
+    <cbc:Description>Mouse gamer inalámbrico</cbc:Description>
+    <cac:Price>79.99</cac:Price>
+  </cac:InvoiceLine>
+  <cac:InvoiceLine ID="7">
+    <cbc:InvoicedQuantity>1</cbc:InvoicedQuantity>
+    <cbc:Description>Cámara digital 4K</cbc:Description>
+    <cac:Price>699.0</cac:Price>
+  </cac:InvoiceLine>
+  <cac:InvoiceLine ID="8">
+    <cbc:InvoicedQuantity>1</cbc:InvoicedQuantity>
+    <cbc:Description>Router Wi-Fi 6 de doble banda</cbc:Description>
+    <cac:Price>149.5</cac:Price>
+  </cac:InvoiceLine>
+  <cac:InvoiceLine ID="9">
+    <cbc:InvoicedQuantity>1</cbc:InvoicedQuantity>
+    <cbc:Description>Disco duro externo 2TB</cbc:Description>
+    <cac:Price>129.99</cac:Price>
+  </cac:InvoiceLine>
+  <cac:InvoiceLine ID="10">
+    <cbc:InvoicedQuantity>1</cbc:InvoicedQuantity>
+    <cbc:Description>Smart TV 55&quot; 4K HDR</cbc:Description>
+    <cac:Price>799.0</cac:Price>
+  </cac:InvoiceLine>
+  <cac:InvoiceLine ID="11">
+    <cbc:InvoicedQuantity>1</cbc:InvoicedQuantity>
+    <cbc:Description>Altavoces Bluetooth potentes</cbc:Description>
+    <cac:Price>149.75</cac:Price>
+  </cac:InvoiceLine>
+  <cac:InvoiceLine ID="12">
+    <cbc:InvoicedQuantity>1</cbc:InvoicedQuantity>
+    <cbc:Description>Cargador portátil 20000mAh</cbc:Description>
+    <cac:Price>49.99</cac:Price>
+  </cac:InvoiceLine>
+  <cac:InvoiceLine ID="13">
+    <cbc:InvoicedQuantity>1</cbc:InvoicedQuantity>
+    <cbc:Description>Auriculares con cancelación de ruido</cbc:Description>
+    <cac:Price>299.0</cac:Price>
+  </cac:InvoiceLine>
+  <cac:InvoiceLine ID="14">
+    <cbc:InvoicedQuantity>1</cbc:InvoicedQuantity>
+    <cbc:Description>Proyector Full HD 1080p</cbc:Description>
+    <cac:Price>699.5</cac:Price>
+  </cac:InvoiceLine>
+  <FirmaElectronica>-----BEGIN PKCS7-----
+    MIIGywYJKoZIhvcNAQcCoIIGszCCBrMCAQExCzAJBgkqhkiG9w0B
+    QIhFw0nYW1wbGUgQ29ycG9yYXRpb24xCzAJBgNVBAYTAlVTMQsw
+    CQYDVQQDDAJUZXN0MRUwEwYDVQQKDAxTeXN0dGVtcyBDbzCCASIw
+    DQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBANx/xxxxx/xxxxx
+    /xxxxx/xxxxx/xxxxx/xxxxx/xxxxx/xxxxx/xxxxx/xxxxx/xxxxx
+    /xxxxx/xxxxx/xxxxx/xxxxx/xxxxx/xxxxx/xxxxx/xxxxx/xxxxx
+    /xxxxx/xxxxx/xxxxx/xxxxx/xxxxx/xxxxx/xxxxx/xxxxx/xxxxx
+    /xxxxx/xxxxx/xxxxx/xxxxx/xxxxx/xxxxx/xxxxx/xxxxx/xxxxx
+    /xxxxx/xxxxx/xxxxx/xxxxx/xxxxx/xxxxx/xxxxx/xxxxx/xxxxx
+    -----END PKCS7-----</FirmaElectronica>
+</Factura>

@@ -6,6 +6,7 @@ def RegistroPage(page: ft.Page):
 
     page.window_maximized=True
     page.window_resizable=False
+    page.title="Registro"
     #page.window_prevent_close = True
     page.window_title_bar_hidden = True
     page.padding=0

@@ -2,6 +2,7 @@ import flet as ft
 import pages.home as us
 
 def view_configurar_usuario(page: ft.Page):
+    page.title="Configurar usuario"
     page.theme_mode = ft.ThemeMode.LIGHT
     page.padding=0
 
@@ -59,9 +60,29 @@ def view_configurar_usuario(page: ft.Page):
     ciudad_campo_texfield=ft.TextField(label="Ingresa tu ciudad")
 
     def guardar_usuario(e):
-        us.id=cedula_campo_texfield.value
-        us.apellidos=apellidos_campo_texfield.value
-        us.nombres=nombres_campo_texfield.value
+        us.id.value=cedula_campo_texfield.value
+        us.apellidos.value=apellidos_campo_texfield.value
+        us.nombres.value=nombres_campo_texfield.value
+        us.correo.value=mail_campo_texfield.value
+        us.ciudad.value=ciudad_campo_texfield.value
+        cedula_campo_texfield.value=""
+        apellidos_campo_texfield.value=""
+        nombres_campo_texfield.value=""
+        mail_campo_texfield.value=""
+        ciudad_campo_texfield.value=""
+        page.snack_bar = ft.SnackBar(
+            ft.Text(f"Cambio realizado con exit!"),
+            bgcolor=ft.colors.GREEN
+        )
+        page.snack_bar.open = True
+        page.update()
+    def limpiar_datos_usuario(e):
+        cedula_campo_texfield.value=""
+        apellidos_campo_texfield.value=""
+        nombres_campo_texfield.value=""
+        mail_campo_texfield.value=""
+        ciudad_campo_texfield.value=""
+        page.update()
         
     pages_configurar_usuario=ft.Column([
         ft.Container(
@@ -153,7 +174,13 @@ def view_configurar_usuario(page: ft.Page):
                                             ft.Row([nombres_campo_texfield,apellidos_campo_texfield]),
                                             mail_campo_texfield,
                                             ciudad_campo_texfield,
-                                            ft.ElevatedButton("Guardar datos",on_click=guardar_usuario)
+                                            ft.Row([
+                                                ft.ElevatedButton("Guardar datos",on_click=guardar_usuario),
+                                                ft.ElevatedButton("limpiar",bgcolor=ft.colors.RED,color=ft.colors.WHITE,
+                                                    on_click=limpiar_datos_usuario
+                                                )
+                                            ])
+                                            
                                         ])
                                         
                                     ),

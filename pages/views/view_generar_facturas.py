@@ -29,6 +29,7 @@ def generar_factura_pro(page: ft.Page):
     # Inicializar el color de fondo del contenedor y el modo de la página
     #page.theme_mode = ft.ThemeMode.LIGHT
     page.padding=0
+    page.title="Historia de facturas"
     Contenedor_rail =ft.Container(padding=0,
         width=140,
         height=650,

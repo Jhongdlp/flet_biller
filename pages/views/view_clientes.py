@@ -70,6 +70,7 @@ def obtener_datos_cliente(escoger_identificador, cedula_campo_textfield, nombre_
     return datos_cliente, None
 #------------------------FUNCION BUSCAR EN LA BASE DE DATOS-------------------------
 def buscar_clientes_por_cedula(page, cedula):
+    page.title="Clientes"
     try:
         connection = pymysql.connect(**db_config)
         cursor = connection.cursor()

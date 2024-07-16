@@ -84,6 +84,4 @@ def validar_ruc_ecuador(ruc):
 
 
 def validar_pasaporte_ecuador(pasaporte):
-    """Placeholder para validación de pasaporte (flexible para extranjeros)."""
-    # Agrega tu lógica aquí si necesitas un formato específico
     return True

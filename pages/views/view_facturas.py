@@ -220,7 +220,7 @@ def view_facturas_all(page: ft.Page):
     global data_table,search_num_factura_field,search_identificador_field,search_fecha_field,pagination_controls,current_page_label
 
     page.padding = 0
-    page.title = "Listado de Facturas"
+    page.title = "Historias de Facturas"
 
     data_table = ft.DataTable( 
         width=1100,

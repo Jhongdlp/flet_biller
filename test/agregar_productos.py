@@ -1,20 +1,9 @@
 import flet as ft
-from components.rail import create_navigation_rail
-def view_estadistica_all(page: ft.Page):
-    page.title="Estadistica"
-    page.padding=0
 
-    Contenedor_rail =ft.Container(padding=0,
-        width=140,
-        height=650,
-        content=ft.Card(
-                #margin=5,
-                variant=ft.CardVariant.OUTLINED,
-                elevation=1,
-                content=create_navigation_rail(page, selected_index=5)
-            )
+def view_inventario_all(page: ft.Page):
+    page.theme_mode = ft.ThemeMode.LIGHT
+    page.padding=0
     
-    ) 
 
     def toggle_theme(e):
         if page.theme_mode == ft.ThemeMode.LIGHT:
@@ -33,9 +22,10 @@ def view_estadistica_all(page: ft.Page):
         on_click=toggle_theme
     )
 
-    view_estadistica=ft.Column([
+    view_inventario=ft.Column([
         ft.Container(
             padding=0,
+            alignment=ft.alignment.center,
             content=ft.Column(spacing=0,controls=[
                 ft.Container(height=60,width=1365,
                     #border=ft.border.all(color='#737780'),  
@@ -48,9 +38,9 @@ def view_estadistica_all(page: ft.Page):
                                 #border=ft.border.only(right=ft.border.BorderSide(1, "#737780")),
                                 content=ft.Row([
                                     ft.VerticalDivider(color=ft.colors.TRANSPARENT),
-                                    ft.Icon(name=ft.icons.QUERY_STATS_ROUNDED,size=40),
+                                    ft.Icon(name=ft.icons.GROUP_OUTLINED,size=40),
                                     ft.VerticalDivider(),
-                                    ft.Text("Estadistica",weight=ft.FontWeight.W_900,color='#3d5ff5',size=18),
+                                    ft.Text("Inventario",weight=ft.FontWeight.W_900,color='#3d5ff5',size=18),
                                     #ft.Text("    "),
                                     ft.VerticalDivider()
                                 ])
@@ -68,29 +58,26 @@ def view_estadistica_all(page: ft.Page):
             ])
         ),
         ft.Container(width=1365,height=650,
+            alignment=ft.alignment.center,
             content=ft.Row(spacing=0,controls=[
-                Contenedor_rail,
-                ft.Container(width=1221,height=650,
-                    border=ft.border.all()
-                    #!IMPLEMENTAR AQUI LO VISUAL
+                ft.Container(width=1366,height=650,
+                    border=ft.border.all(),
+                    content=(ft.Column([
+                        ft.Container(
+                            
+                            padding=0,
+                            content=ft.Card(
+                                content=ft.Column([
+                                    ft.Text("Agregar produtos",size=20)
+                                ])
+                            )
+                        )
+                    ]))
                 )
             ],alignment=ft.MainAxisAlignment.START)
 
         )
         ]
     )
-    return ft.Row(
-        spacing=0,
-        controls=[
-            ft.Container(
-                expand=True,
-                content=ft.Column(
-                    spacing=0,
-                    controls=[
-                        view_estadistica
-                    ]
-                )
-            )
-        ]
-    )
-
+    page.add(view_inventario)
+ft.app(target=view_inventario_all)

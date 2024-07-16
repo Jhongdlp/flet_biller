@@ -9,6 +9,7 @@ ciudad=ft.Text("")
 def HomePage(page: ft.Page):
     page.theme_mode=ft.ThemeMode.LIGHT
     page.window_maximized=True
+    page.title="Menu principal"
     page.window_title_bar_hidden = True
     page.padding=0
     page.update()
