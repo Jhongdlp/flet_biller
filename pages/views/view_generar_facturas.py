@@ -18,9 +18,194 @@ import uuid
 import pymysql
 import xml.etree.ElementTree as ET
 
+def buscar_cliente(page, identificador, nombre_cliente_texfield,
+                    apellido_cliente_texfield, direccion_cliente_texfield,
+                    telefono_cliente_texfield, mail_cliente_texfield): 
+    """Busca un cliente en la base de datos por su identificador.
+       Recibe referencias a los TextFields como argumentos."""
+
+    conexion = pymysql.connect(host="localhost", user="root", password="", database="billify")
+    
+    try:
+        cursor = conexion.cursor()
+        sql = "SELECT * FROM clientes WHERE identificador = %s"
+        cursor.execute(sql, (identificador,))
+        cliente = cursor.fetchone()
+
+        if cliente:
+            page.snack_bar = ft.SnackBar(
+                ft.Text("Cliente encontrado", size=20),
+                bgcolor=ft.colors.GREEN_400,
+                duration=2000
+            )
+            page.snack_bar.open = True
+            
+            # Autocompletar campos utilizando las referencias recibidas
+            nombre_cliente_texfield.value = cliente[2].split()[0]
+            apellido_cliente_texfield.value = " ".join(cliente[2].split()[1:])
+            direccion_cliente_texfield.value = cliente[3]
+            telefono_cliente_texfield.value = cliente[4]
+            mail_cliente_texfield.value = cliente[5]
+            
+            # Actualizar la página para mostrar los cambios en los TextFields
+            page.update() 
+
+        else:
+            page.snack_bar = ft.SnackBar(
+                ft.Text("Cliente no encontrado", size=20),
+                bgcolor=ft.colors.RED_400,
+                duration=2000
+            )
+            page.snack_bar.open = True
+            page.update() 
+
+    except Exception as e:
+        print(f"Error al buscar cliente: {e}")
+        page.snack_bar = ft.SnackBar(
+            ft.Text("Error al buscar cliente en la base de datos", size=20),
+            bgcolor=ft.colors.RED_400,
+            duration=3000
+        )
+        page.snack_bar.open = True
+        page.update() 
+    finally:
+        cursor.close()
+        conexion.close()
 
 
 def generar_factura_pro(page: ft.Page):
+        #!Alerta de reportar problema
+    def close_Reporte_problemas(e):
+        Reporte_problemas.open = False
+        page.update()
+
+    def Close_and_open_gracias(e):
+        Reporte_problemas.open = False
+        page.dialog = Mensaje_de_gracias
+        Mensaje_de_gracias.open = True
+        page.update()
+
+    def close_dlg_mensaje_gracias(e):
+        Mensaje_de_gracias.open = False
+        page.update()
+
+    Mensaje_de_gracias = ft.AlertDialog(
+        modal=True,
+        title=ft.Text("Muchas gracias por tu colaboración!",size=30),
+        content=ft.Text("haremos lo posible para solucionarlo",size=15),
+        actions=[
+            ft.FilledButton("Volver al menu", on_click=close_dlg_mensaje_gracias),
+        ],
+        on_dismiss=lambda e: print("Dialog dismissed!"),
+        actions_alignment=ft.MainAxisAlignment.CENTER,
+    )
+    page.update()
+
+    Reporte_problemas=ft.AlertDialog(
+        modal=True,
+        title=ft.Text("Reporte de problemas"),
+        content=ft.Text("Por favor selecciona el problema junto a una descripción"),
+        actions=[
+            ft.Column(
+                [
+                    ft.Divider(),
+                    ft.Checkbox(label="Problema de rendimiento", value=False),
+                    ft.Checkbox(label="Error en mostrar datos", value=False),
+                    ft.Checkbox(label="Error en el manejo de ventanas", value=False),
+                    ft.Checkbox(label="Problemas de bugs", value=False),
+                    ft.Checkbox(label="Calculos incorrectos", value=False),
+                    ft.Checkbox(label="Otros...", value=False),
+                    ft.TextField(
+                        label="Describe el problema",
+                        multiline=True,
+                        max_length=250,
+                        max_lines=5,
+                    ),
+                    ft.Row(
+                        [
+                            ft.FilledButton(
+                                text="Volver",
+                                on_click=close_Reporte_problemas,  
+                            ),
+                            ft.FilledButton(text="Enviar",
+                                on_click=Close_and_open_gracias,
+                            ),
+                        ],
+                        alignment=ft.MainAxisAlignment.CENTER,
+                    )
+                ]
+            )
+        ],
+        on_dismiss=lambda e: print("Modal dialog dismissed!"),
+    )
+    def open_dlg_modal_3(e):
+        page.dialog = Reporte_problemas
+        Reporte_problemas.open = True
+        page.update()
+
+    #!Alerta de cerrar secion
+    def close_alert_cerrar_secion(e):
+        Alert_cerrar_secion.open = False
+        page.update()
+    
+    def close_alert_and_go_login(e):
+        Alert_cerrar_secion.open = False
+        page.go("/")
+        page.update()
+
+    Alert_cerrar_secion = ft.AlertDialog(
+        modal=True,
+
+        title=ft.Text("Por favor confirma"),
+        content=ft.Text("Estas seguro de cerrar esta sesión?"),
+        actions=[
+            ft.TextButton("Si", on_click=close_alert_and_go_login),
+            ft.TextButton("No", on_click=close_alert_cerrar_secion),
+        ],
+        actions_alignment=ft.MainAxisAlignment.END,
+        on_dismiss=lambda e: print("Modal dialog dismissed!"),
+    )
+
+    
+    def open_Alert_cerrar_secion(e):
+        page.dialog = Alert_cerrar_secion
+        Alert_cerrar_secion.open = True
+        page.update()
+    def on_identificador_cliente_enter(e):
+        """
+        Maneja el evento cuando se presiona Enter en el campo identificador_cliente_texfield.
+        Realiza la búsqueda del cliente en la base de datos.
+        """
+
+        # Obtener el valor del campo de identificación del cliente
+        identificador = identificador_cliente_texfield.value
+
+        # Verificar que se haya ingresado algún valor   
+        if identificador:
+            # Formatear el identificador para que coincida con la base de datos
+            tipo_id = Escoger_identificador.value
+            if tipo_id == "Cedula":
+                identificador = f"C.{identificador}"
+            elif tipo_id == "RUC":
+                identificador = f"R.{identificador}"
+            elif tipo_id == "Pasaporte":
+                identificador = f"P.{identificador}"
+            
+            buscar_cliente(page, identificador, 
+                         nombre_cliente_texfield, apellido_cliente_texfield, 
+                         direccion_cliente_texfield, telefono_cliente_texfield, 
+                         mail_cliente_texfield)
+
+        else:
+            page.snack_bar = ft.SnackBar(
+                ft.Text("Por favor, ingresa un identificador", size=20),
+                bgcolor=ft.colors.YELLOW_400, 
+                duration=2000
+            )
+            page.snack_bar.open = True
+    
+
+
     #!==================================================================================
     #!=                                                                                =
     #!=                                 PAGINA TRES                                     =
@@ -68,6 +253,7 @@ def generar_factura_pro(page: ft.Page):
     identificador_cliente_texfield=ft.TextField(label=("Identificador"),width=230,height=45,
         input_filter=ft.InputFilter(allow=True, regex_string=r"[0-9]", replacement_string=""),
         error_text=None,  # No mostrar error inicialmente
+        on_submit=on_identificador_cliente_enter # Asigna la función al evento on_submit
     )
     nombre_cliente_texfield=ft.TextField(label=("Nombre"),width=230,height=45,
         input_filter=ft.InputFilter(
@@ -935,7 +1121,7 @@ def generar_factura_pro(page: ft.Page):
     telefono_cliente_texfield.on_change = on_change
     mail_cliente_texfield.on_change = on_change
     page.update()
-    delete_all_button = ft.ElevatedButton(text="Limpiar todas las filas", on_click=delete_all_rows,color=ft.colors.WHITE,bgcolor=ft.colors.RED)
+    delete_all_button = ft.ElevatedButton(text="Limpiar todas las filas", on_click=delete_all_rows,color=ft.colors.WHITE,bgcolor=ft.colors.BLUE)
 
     Boton_consumirdor_final=ft.ElevatedButton("Consumidor final",width=158,height=35,bgcolor=ft.colors.GREEN_500,color="WHITE",
         on_click=consumidor_final
@@ -973,7 +1159,7 @@ def generar_factura_pro(page: ft.Page):
                         margin=5, 
                         variant=ft.CardVariant.OUTLINED,
                         content=ft.Row(spacing=0,controls=[
-                            ft.Container(height=60,width=320,
+                            ft.Container(height=60,width=1200,
                                 #border=ft.border.only(right=ft.border.BorderSide(1, "#737780")),
                                 content=ft.Row([
                                     ft.VerticalDivider(color=ft.colors.TRANSPARENT),
@@ -985,11 +1171,39 @@ def generar_factura_pro(page: ft.Page):
                                     
                                 ])
                             ),
-                            ft.Container(height=60,width=320,
+                            ft.Container(height=60,width=1200,
                                 #border=ft.border.only(right=ft.border.BorderSide(1, "#737780")),
                                 content=ft.Row([
                                     ft.VerticalDivider(color=ft.colors.TRANSPARENT),
-                                    boton_dark_light_mode
+                                    ft.Row([
+                                        ft.VerticalDivider(color=ft.colors.TRANSPARENT),
+                                        boton_dark_light_mode,
+                                        ft.PopupMenuButton(
+                                            items=[
+                                                ft.PopupMenuItem(),  # divider
+                                                ft.PopupMenuItem(
+                                                    content=ft.Row(
+                                                        [
+                                                            ft.Icon(ft.icons.BUG_REPORT),
+                                                            ft.Text("Reporte de errores"),
+                                                        ]
+                                                    ),
+                                                    on_click=open_dlg_modal_3
+                                                ),
+                                                ft.PopupMenuItem(),  # divider
+                                                ft.PopupMenuItem(
+                                                    content=ft.Row(
+                                                        [
+                                                            ft.Icon(ft.icons.EXIT_TO_APP),
+                                                            ft.Text("Cerrar la sesión"),
+                                                        ]
+                                                    ),
+                                                    on_click=open_Alert_cerrar_secion
+                                                ),
+                                                ft.PopupMenuItem(),  # divider
+                                            ]
+                                        )
+                                    ],alignment=ft.MainAxisAlignment.END)
                                 ])
                             )
                         ]) 
@@ -1009,7 +1223,7 @@ def generar_factura_pro(page: ft.Page):
                                 content=ft.Column(spacing=0,controls=[
                                     ft.Row(spacing=0,controls=[
                                         ft.Text("Datos de cliente",size=25),
-                                        ft.ElevatedButton(text="Limpiar",on_click=limpiar_datos_clientes,bgcolor=ft.colors.RED,color=ft.colors.WHITE),
+                                        ft.ElevatedButton(text="Limpiar",on_click=limpiar_datos_clientes,bgcolor=ft.colors.BLUE,color=ft.colors.WHITE),
                                     ],alignment=ft.MainAxisAlignment.SPACE_BETWEEN),
                                     ft.Divider(),
                                         ft.Row(spacing=5,controls=[

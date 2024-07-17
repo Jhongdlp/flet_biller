@@ -2,6 +2,8 @@ import flet as ft
 import pymysql
 from cryptography.fernet import Fernet
 
+
+Usuario=ft.TextField(label="Usuario", border="underline", hint_text="Ingresa tu usuario",width=250,height=60)
 def Login_page(page: ft.Page):
     page.window_maximized=True
     #page.window_resizable=False
@@ -96,12 +98,12 @@ def Login_page(page: ft.Page):
                 page.go("/home")
             else:
                 print("La contraseña es incorrecta. No se permitió el acceso.")
-                page.snack_bar = ft.SnackBar(ft.Text(f"La contraseña es incorrecta. No se permitió el acceso."))
+                page.snack_bar = ft.SnackBar(ft.Text(f"La contraseña es incorrecta. No se permitió el acceso."),bgcolor=ft.colors.RED)
                 page.snack_bar.open = True
                 page.update()
         else:
             print("No se encontró el usuario en la base de datos.")
-            page.snack_bar = ft.SnackBar(ft.Text(f"No se encontró el usuario en la base de datos."))
+            page.snack_bar = ft.SnackBar(ft.Text(f"No se encontró el usuario en la base de datos."),bgcolor=ft.colors.RED)
             page.snack_bar.open = True
             page.update()
 
@@ -150,7 +152,7 @@ def Login_page(page: ft.Page):
 
 
     #!Variables de campos de entrada
-    Usuario=ft.TextField(label="Usuario", border="underline", hint_text="Ingresa tu usuario",width=250,height=60)
+   
     Password=ft.TextField(label="Contraseña", border="underline", 
         hint_text="Ingresa tu contraseña",width=250,height=60,
         password=True, can_reveal_password=True

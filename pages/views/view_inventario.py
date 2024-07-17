@@ -204,7 +204,104 @@ def view_inventario_all(page: ft.Page):
         icon=ft.icons.LIGHT_MODE,  # Icono inicial del sol
         on_click=toggle_theme
     )
+            #!Alerta de reportar problema
 
+    def close_Reporte_problemas(e):
+        Reporte_problemas.open = False
+        page.update()
+
+    def Close_and_open_gracias(e):
+        Reporte_problemas.open = False
+        page.dialog = Mensaje_de_gracias
+        Mensaje_de_gracias.open = True
+        page.update()
+
+    def close_dlg_mensaje_gracias(e):
+        Mensaje_de_gracias.open = False
+        page.update()
+
+    Mensaje_de_gracias = ft.AlertDialog(
+        modal=True,
+        title=ft.Text("Muchas gracias por tu colaboración!",size=30),
+        content=ft.Text("haremos lo posible para solucionarlo",size=15),
+        actions=[
+            ft.FilledButton("Volver al menu", on_click=close_dlg_mensaje_gracias),
+        ],
+        on_dismiss=lambda e: print("Dialog dismissed!"),
+        actions_alignment=ft.MainAxisAlignment.CENTER,
+    )
+    page.update()
+
+    Reporte_problemas=ft.AlertDialog(
+        modal=True,
+        title=ft.Text("Reporte de problemas"),
+        content=ft.Text("Por favor selecciona el problema junto a una descripción"),
+        actions=[
+            ft.Column(
+                [
+                    ft.Divider(),
+                    ft.Checkbox(label="Problema de rendimiento", value=False),
+                    ft.Checkbox(label="Error en mostrar datos", value=False),
+                    ft.Checkbox(label="Error en el manejo de ventanas", value=False),
+                    ft.Checkbox(label="Problemas de bugs", value=False),
+                    ft.Checkbox(label="Calculos incorrectos", value=False),
+                    ft.Checkbox(label="Otros...", value=False),
+                    ft.TextField(
+                        label="Describe el problema",
+                        multiline=True,
+                        max_length=250,
+                        max_lines=5,
+                    ),
+                    ft.Row(
+                        [
+                            ft.FilledButton(
+                                text="Volver",
+                                on_click=close_Reporte_problemas,  
+                            ),
+                            ft.FilledButton(text="Enviar",
+                                on_click=Close_and_open_gracias,
+                            ),
+                        ],
+                        alignment=ft.MainAxisAlignment.CENTER,
+                    )
+                ]
+            )
+        ],
+        on_dismiss=lambda e: print("Modal dialog dismissed!"),
+    )
+    def open_dlg_modal_3(e):
+        page.dialog = Reporte_problemas
+        Reporte_problemas.open = True
+        page.update()
+
+    #!Alerta de cerrar secion
+    def close_alert_cerrar_secion(e):
+        Alert_cerrar_secion.open = False
+        page.update()
+    
+    def close_alert_and_go_login(e):
+        Alert_cerrar_secion.open = False
+        page.go("/")
+        page.update()
+
+    Alert_cerrar_secion = ft.AlertDialog(
+        modal=True,
+
+        title=ft.Text("Por favor confirma"),
+        content=ft.Text("Estas seguro de cerrar esta sesión?"),
+        actions=[
+            ft.TextButton("Si", on_click=close_alert_and_go_login),
+            ft.TextButton("No", on_click=close_alert_cerrar_secion),
+        ],
+        actions_alignment=ft.MainAxisAlignment.END,
+        on_dismiss=lambda e: print("Modal dialog dismissed!"),
+    )
+
+    
+    def open_Alert_cerrar_secion(e):
+        page.dialog = Alert_cerrar_secion
+        Alert_cerrar_secion.open = True
+        page.update()
     view_inventario=ft.Column([
         ft.Container(
             padding=0,
@@ -216,7 +313,7 @@ def view_inventario_all(page: ft.Page):
                         margin=5, 
                         variant=ft.CardVariant.OUTLINED,
                         content=ft.Row(spacing=0,controls=[
-                            ft.Container(height=60,width=320,
+                            ft.Container(height=60,width=380,
                                 #border=ft.border.only(right=ft.border.BorderSide(1, "#737780")),
                                 content=ft.Row([
                                     ft.VerticalDivider(color=ft.colors.TRANSPARENT),
@@ -227,18 +324,46 @@ def view_inventario_all(page: ft.Page):
                                     ft.VerticalDivider()
                                 ])
                             ),
-                            ft.Container(height=60,width=900,
+                            ft.Container(height=60,width=1100,
                                 #border=ft.border.only(right=ft.border.BorderSide(1, "#737780")),
                                 alignment=ft.alignment.top_left,
                                 padding=0,
                                 content=ft.Row([
                                     ft.VerticalDivider(color=ft.colors.TRANSPARENT),
-                                    boton_dark_light_mode,
                                     search_field,
                                     search_tip_prod_field,
                                     search_tip_esp_prod_field,
                                     clear_button,
-                                    current_page_label  # Indicador de la página actual
+                                    current_page_label,  # Indicador de la página actual,
+                                    ft.Row([
+                                        ft.VerticalDivider(color=ft.colors.TRANSPARENT),
+                                        boton_dark_light_mode,
+                                        ft.PopupMenuButton(
+                                            items=[
+                                                ft.PopupMenuItem(),  # divider
+                                                ft.PopupMenuItem(
+                                                    content=ft.Row(
+                                                        [
+                                                            ft.Icon(ft.icons.BUG_REPORT),
+                                                            ft.Text("Reporte de errores"),
+                                                        ]
+                                                    ),
+                                                    on_click=open_dlg_modal_3
+                                                ),
+                                                ft.PopupMenuItem(),  # divider
+                                                ft.PopupMenuItem(
+                                                    content=ft.Row(
+                                                        [
+                                                            ft.Icon(ft.icons.EXIT_TO_APP),
+                                                            ft.Text("Cerrar la sesión"),
+                                                        ]
+                                                    ),
+                                                    on_click=open_Alert_cerrar_secion
+                                                ),
+                                                ft.PopupMenuItem(),  # divider
+                                            ]
+                                        )
+                                    ],alignment=ft.MainAxisAlignment.END)
                                 ])
                             )
                         ]) 

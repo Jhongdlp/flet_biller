@@ -111,7 +111,7 @@ def RegistroPage(page: ft.Page):
         # Validar que los campos no estén vacíos
         if not usuario or not correo_electronico or not contraseña or not confirmar_contraseña:
             print("Los campos no pueden estar vacíos")
-            page.snack_bar = ft.SnackBar(ft.Text(f"Los campos no pueden estar vacíos."))
+            page.snack_bar = ft.SnackBar(ft.Text(f"Los campos no pueden estar vacíos."),bgcolor=ft.colors.RED)
             page.snack_bar.open = True
             page.update()
             return
@@ -119,7 +119,9 @@ def RegistroPage(page: ft.Page):
         # Validar que la contraseña y la confirmación de la contraseña coincidan
         if contraseña != confirmar_contraseña:
             print("La contraseña y la confirmación de la contraseña no coinciden")
-            page.snack_bar = ft.SnackBar(ft.Text(f"La contraseña y la confirmación de la contraseña no coinciden."))
+            page.snack_bar = ft.SnackBar(ft.Text(f"La contraseña y la confirmación de la contraseña no coinciden.")
+                ,bgcolor=ft.colors.RED
+            )
             page.snack_bar.open = True
             page.update()
             return
@@ -145,13 +147,13 @@ def RegistroPage(page: ft.Page):
             Correo_electronico.value = ""
             Ingrese_contraseña.value = ""
             Confirmar_contraseña.value = ""
-            page.snack_bar = ft.SnackBar(ft.Text(f"Datos insertados correctamente."))
+            page.snack_bar = ft.SnackBar(ft.Text(f"Cuenta creada correctamente."),bgcolor=ft.colors.GREEN)
             page.snack_bar.open = True
             page.update()
         except:
             bd.rollback()
             print("Error al insertar datos en la base de datos")
-            page.snack_bar = ft.SnackBar(ft.Text(f"Error al insertar datos en la base de datos."))
+            page.snack_bar = ft.SnackBar(ft.Text(f"Error al insertar datos en la base de datos.",bgcolor=ft.colors.RED))
             page.snack_bar.open = True
             page.update()
         # Cerrar la conexión a la base de datos

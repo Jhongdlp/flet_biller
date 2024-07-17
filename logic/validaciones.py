@@ -1,6 +1,6 @@
 
 def validar_cedula_ecuador(cedula):
-    """Verifica si una cédula ecuatoriana es válida."""
+
     if len(cedula) != 10 or not cedula.isdigit():
         return False
     # Verificar el código de provincia
@@ -26,7 +26,7 @@ def validar_cedula_ecuador(cedula):
 
 
 def validar_ruc_ecuador(ruc):
-    """Verifica si un RUC ecuatoriano es válido."""
+
     print(f"RUC recibido: {ruc}")
     if len(ruc) != 13 or not ruc.isdigit():
         print("Error: Longitud o formato incorrecto")

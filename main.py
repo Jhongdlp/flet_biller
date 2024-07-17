@@ -9,11 +9,18 @@ from pages.views.view_clientes import view_clientes_all
 from pages.views.view_generar_facturas import generar_factura_pro
 from pages.views.view_facturas import view_facturas_all
 from pages.views.view_estadistica import view_estadistica_all
-
+from pages.views.view_agregar_productos import view_add_pro_all
+from pages.views.configuracion import view_configuracion_all
 # Función principal
 def main(page: ft.Page):
     # Contenedor para las páginas
     page_container = ft.Container(expand=True)
+    page.theme_mode=ft.ThemeMode.LIGHT
+    # Establecer la pantalla de carga
+
+    
+    # Configurar el ícono de la ventana
+    page.favicon = "https://i.ibb.co/ZxS6FDs/Logo.png"
 
     # Función para actualizar el contsenido de la página
     def on_route_change(route):
@@ -42,6 +49,13 @@ def main(page: ft.Page):
 
         elif page_name == "Inventario":
             page_container.content = view_inventario_all(page)
+        
+        elif page_name == "Agregar_productos":
+            page_container.content = view_add_pro_all(page)
+
+        elif page_name == "Configuraciones":
+            page_container.content = view_configuracion_all(page)
+
         
         elif page_name == "Estadistica":
             page_container.content = view_estadistica_all(page)
